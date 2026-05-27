@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Database, Play, RotateCcw, Terminal, Table, BookOpen, AlertTriangle } from 'lucide-react';
 
-const INITIAL_DATABASE = [];
+const INITIAL_DATABASE = [
+  { id: 1, nome: 'Felipe Louzeiro', linguagem: 'PHP', nota: 9.5, vip: true },
+  { id: 2, nome: 'Ana Silva', linguagem: 'JS', nota: 8.0, vip: false },
+  { id: 3, nome: 'Carlos Mendes', linguagem: 'CSS', nota: 7.5, vip: false },
+  { id: 4, nome: 'Mariana Costa', linguagem: 'PHP', nota: 10.0, vip: true },
+  { id: 5, nome: 'João Souza', linguagem: 'HTML', nota: 6.5, vip: false },
+  { id: 6, nome: 'Beatriz Lima', linguagem: 'JS', nota: 9.0, vip: true },
+  { id: 7, nome: 'Lucas Almeida', linguagem: 'Laravel', nota: 8.5, vip: false },
+  { id: 8, nome: 'Fernanda Rocha', linguagem: 'JS', nota: 5.5, vip: false },
+];
 
 const SQL_TEMPLATES = [
   {

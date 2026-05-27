@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, Copy, Check, Search, Layers, Code2, Terminal, Cpu } from 'lucide-react';
+import { BookOpen, Copy, Check, Search, Layers, Code2, Terminal, Cpu, Database } from 'lucide-react';
 
 const CHEATSHEETS = [
   {
@@ -157,6 +157,40 @@ try {
 }
 ?>`,
         desc: "Estrutura recomendada profissional para conectar ao MySQL de forma blindada contra SQL Injection."
+      }
+    ]
+  },
+  {
+    tech: "mysql",
+    title: "MySQL Consultas & CRUD",
+    icon: <Database className="w-5 h-5 text-cyan-400" />,
+    items: [
+      {
+        name: "Comando SELECT (Ler)",
+        snippet: `-- Busca tudo
+SELECT * FROM usuarios;
+
+-- Busca com Filtro e Ordem
+SELECT nome, email FROM usuarios 
+WHERE ativo = 1 
+ORDER BY nome ASC 
+LIMIT 10;`,
+        desc: "O comando mais importante. Use WHERE para filtrar, ORDER BY para ordenar e LIMIT para paginar resultados."
+      },
+      {
+        name: "Comando INSERT (Criar)",
+        snippet: `INSERT INTO usuarios (nome, email, ativo) 
+VALUES ('Novo Usuário', 'email@teste.com', 1);`,
+        desc: "Criação de novos registros. A ordem dos campos em () deve corresponder exatamente à ordem dos valores em VALUES()."
+      },
+      {
+        name: "Comandos UPDATE e DELETE (Perigo!)",
+        snippet: `-- Atualizar
+UPDATE usuarios SET ativo = 0 WHERE id = 5;
+
+-- Excluir
+DELETE FROM usuarios WHERE id = 5;`,
+        desc: "CUIDADO: Nunca execute estes comandos sem a cláusula WHERE, ou você aplicará a ação a todas as linhas da tabela!"
       }
     ]
   }
