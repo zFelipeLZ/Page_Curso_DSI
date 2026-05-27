@@ -9,6 +9,7 @@ const TECH_COLORS = {
   CSS:     { text: 'text-blue-400',   dot: 'bg-blue-400' },
   JS:      { text: 'text-amber-400',  dot: 'bg-amber-400' },
   PHP:     { text: 'text-purple-400', dot: 'bg-purple-400' },
+  MySQL:   { text: 'text-cyan-400',   dot: 'bg-cyan-400' },
   Laravel: { text: 'text-rose-400',   dot: 'bg-rose-400' },
 };
 

@@ -703,11 +703,124 @@ echo "Usuário encontrado: " . $usuario['nome'];
   },
 
   // ─────────────────────────────────────────
-  // ETAPA 5 — LARAVEL: AMBIENTE
+  // ETAPA 5 — BANCO DE DADOS MYSQL
+  // ─────────────────────────────────────────
+  {
+    id: "stage-mysql",
+    stageNumber: 5,
+    title: "MySQL Banco de Dados",
+    subtitle: "Modelagem e Consultas Relacionais",
+    tech: "MySQL",
+    level: "Intermediário",
+    optional: false,
+    accent: "#0ea5e9",
+    glow: "rgba(14, 165, 233, 0.15)",
+    lessons: [
+      {
+        id: "mysql-intro",
+        title: "1. Introdução ao MySQL e SQL",
+        level: "Iniciante",
+        badge: "Fundamentos",
+        description: "Aprenda os conceitos básicos de bancos de dados relacionais e tabelas.",
+        content: `
+          <p>Bancos de dados relacionais organizam dados em <strong>tabelas</strong> compostas por linhas (registros) e colunas (atributos). O <strong>MySQL</strong> é o banco de dados de código aberto mais popular da web.</p>
+
+          <h4>O que é SQL?</h4>
+          <p>SQL (Structured Query Language) é a linguagem que usamos para nos comunicar com o banco de dados. Os comandos mais fundamentais são o <strong>CRUD</strong>:</p>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><strong>C</strong>reate: <code>INSERT INTO</code> (Inserir dados)</li>
+            <li><strong>R</strong>ead: <code>SELECT</code> (Ler dados)</li>
+            <li><strong>U</strong>pdate: <code>UPDATE</code> (Atualizar dados)</li>
+            <li><strong>D</strong>elete: <code>DELETE</code> (Apagar dados)</li>
+          </ul>
+        `,
+        demoCode: `-- Criando um banco de dados e uma tabela
+CREATE DATABASE IF NOT EXISTS curso_db;
+USE curso_db;
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`,
+        resources: {
+          videos: [
+            { title: "Curso de MySQL - Banco de Dados", url: "https://www.youtube.com/watch?v=Ofktsne-utM", duration: "1h 15min" }
+          ],
+          docs: [
+            { title: "MySQL 8.0 Reference Manual", url: "https://dev.mysql.com/doc/refman/8.0/en/" }
+          ]
+        },
+        quiz: {
+          question: "Qual comando SQL é utilizado para ler dados de uma tabela?",
+          options: [
+            { text: "GET", correct: false },
+            { text: "READ", correct: false },
+            { text: "SELECT", correct: true },
+            { text: "FETCH", correct: false }
+          ],
+          explanation: "O comando SELECT é a instrução principal da linguagem SQL para buscar, filtrar e ler informações contidas nas tabelas do banco."
+        }
+      },
+      {
+        id: "mysql-queries",
+        title: "2. Manipulação de Dados (CRUD)",
+        level: "Intermediário",
+        badge: "Prática",
+        description: "Execute operações reais de inserir, consultar, atualizar e excluir dados.",
+        content: `
+          <p>Para manipular os dados na tabela que criamos, utilizaremos as quatro operações básicas do CRUD. A sintaxe requer bastante atenção, principalmente com a cláusula <strong>WHERE</strong>.</p>
+
+          <h4>Cláusula WHERE e Segurança</h4>
+          <p>A cláusula <code>WHERE</code> funciona como um filtro. <strong>CUIDADO:</strong> Nunca faça um <code>UPDATE</code> ou <code>DELETE</code> sem um <code>WHERE</code>, ou você alterará/apagará TODOS os registros da tabela!</p>
+        `,
+        demoCode: `-- 1. CREATE (Inserir)
+INSERT INTO usuarios (nome, email) 
+VALUES ('Felipe', 'felipe@email.com');
+
+-- 2. READ (Consultar)
+-- Busca todos os campos de todos os usuários
+SELECT * FROM usuarios;
+
+-- Busca com filtro
+SELECT nome, email FROM usuarios WHERE id = 1;
+
+-- 3. UPDATE (Atualizar)
+UPDATE usuarios 
+SET nome = 'Felipe Editado' 
+WHERE id = 1;
+
+-- 4. DELETE (Deletar)
+DELETE FROM usuarios WHERE id = 1;`,
+        resources: {
+          videos: [
+            { title: "MySQL: INSERT, UPDATE e DELETE", url: "https://www.youtube.com/watch?v=5rKte0Yp-YQ", duration: "45min" }
+          ],
+          docs: [
+            { title: "MySQL - Data Manipulation", url: "https://dev.mysql.com/doc/refman/8.0/en/data-manipulation.html" }
+          ]
+        },
+        quiz: {
+          question: "Por que é extremamente perigoso executar um comando UPDATE ou DELETE sem a cláusula WHERE?",
+          options: [
+            { text: "O banco de dados trava e precisa ser reiniciado.", correct: false },
+            { text: "O comando afetará TODOS os registros da tabela ao invés de um específico.", correct: true },
+            { text: "Dará um erro de sintaxe e nada será executado.", correct: false },
+            { text: "O comando criará cópias dos registros.", correct: false }
+          ],
+          explanation: "O WHERE define o alvo (ex: WHERE id = 1). Sem ele, o banco entende que a regra se aplica a todas as linhas. Exemplo: DELETE FROM usuarios (apaga todo mundo)."
+        }
+      }
+    ]
+  },
+
+  // ─────────────────────────────────────────
+  // ETAPA 6 — LARAVEL: AMBIENTE
   // ─────────────────────────────────────────
   {
     id: "stage-laravel-setup",
-    stageNumber: 5,
+    stageNumber: 6,
     title: "Laravel: Ambiente",
     subtitle: "Instalação e configuração do projeto",
     tech: "Laravel",
@@ -835,11 +948,11 @@ meu-sistema/
   },
 
   // ─────────────────────────────────────────
-  // ETAPA 6 — LARAVEL: BANCO MySQL
+  // ETAPA 7 — LARAVEL: BANCO MySQL
   // ─────────────────────────────────────────
   {
     id: "stage-laravel-db",
-    stageNumber: 6,
+    stageNumber: 7,
     title: "Laravel: Banco de Dados",
     subtitle: "MySQL, Migrations e Eloquent ORM",
     tech: "Laravel",
@@ -983,11 +1096,11 @@ $produtos = Produto::where('estoque', '>', 0)
   },
 
   // ─────────────────────────────────────────
-  // ETAPA 7 — LARAVEL: ARQUITETURA MVC
+  // ETAPA 8 — LARAVEL: ARQUITETURA MVC
   // ─────────────────────────────────────────
   {
     id: "stage-laravel-mvc",
-    stageNumber: 7,
+    stageNumber: 8,
     title: "Laravel: Arquitetura MVC",
     subtitle: "Rotas, Controllers e Views Blade",
     tech: "Laravel",
@@ -1116,11 +1229,11 @@ Route::resource('produtos', ProdutoController::class);
   },
 
   // ─────────────────────────────────────────
-  // ETAPA 8 — LARAVEL: PROJETO REAL (MVP)
+  // ETAPA 9 — LARAVEL: PROJETO REAL (MVP)
   // ─────────────────────────────────────────
   {
     id: "stage-laravel-mvp",
-    stageNumber: 8,
+    stageNumber: 9,
     title: "Laravel: Projeto Real",
     subtitle: "Construindo um MVP completo do zero",
     tech: "Laravel",
