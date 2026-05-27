@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* 
+==================================================
+   CUSTOM AESTHETIC STYLES & CORE COMPONENT CSS
+==================================================
+*/
+
+:root {
+  /* Language Accents */
+  --color-html: #ef4444;
+  --color-css: #3b82f6;
+  --color-js: #f59e0b;
+  --color-php: #8b5cf6;
+  
+  --primary-glow: rgba(59, 130, 246, 0.25);
+  
+  /* Scrollbar Customization */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.25);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.45);
+  }
+}
+
+/* Base resets & smooth transitions */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Custom styles for Code Sandboxes & Simulators */
+.tab-active-html {
+  border-bottom: 2px solid var(--color-html) !important;
+  color: #f3f4f6 !important;
+}
+
+.tab-active-css {
+  border-bottom: 2px solid var(--color-css) !important;
+  color: #f3f4f6 !important;
+}
+
+.tab-active-js {
+  border-bottom: 2px solid var(--color-js) !important;
+  color: #f3f4f6 !important;
+}
+
+/* Glow Shadow utilities */
+.glow-html {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+.glow-css {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+}
+.glow-js {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+}
+.glow-php {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+}
+
+/* PHP step execution highlight overlay row styling */
+.php-execution-overlay {
+  background-color: rgba(16, 185, 129, 0.08);
+  border-left: 3px solid #10b981;
+  pointer-events: none;
+  transition: top 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 24.4px;
+}
+
+/* Confetti particles canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Custom styling for certificate printing */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-certificate, #printable-certificate * {
+    visibility: visible;
+  }
+  #printable-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}
