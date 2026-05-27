@@ -222,54 +222,75 @@ export default function App() {
             </div>
 
             {/* Certificate */}
-            <div className="border border-slate-800/50 rounded-2xl overflow-hidden bg-slate-950 shadow-inner">
+            <div className="border border-slate-800/50 rounded-2xl overflow-hidden bg-slate-950 shadow-inner flex justify-center p-4 md:p-8 overflow-x-auto">
               <div
                 id="printable-certificate"
-                className="bg-slate-950 border-8 border-double border-amber-500/20 p-8 md:p-12 text-center text-slate-100 flex flex-col items-center justify-between gap-8 min-h-[440px] relative overflow-hidden"
+                className="relative bg-[#fdfbf7] w-[800px] h-[565px] min-w-[800px] shadow-2xl p-2"
+                style={{
+                  backgroundImage: "url('https://www.transparenttextures.com/patterns/cream-paper.png')"
+                }}
               >
-                <div className="absolute -top-16 -right-16 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
-                <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl" />
+                {/* Inner Border */}
+                <div className="w-full h-full border-[10px] border-double border-[#b8860b] p-8 relative flex flex-col items-center justify-between z-10 before:absolute before:inset-2 before:border before:border-[#d4af37] before:pointer-events-none">
+                  
+                  {/* Decorative Elements */}
+                  <div className="absolute top-6 left-6 w-16 h-16 border-t-2 border-l-2 border-[#b8860b] opacity-50"></div>
+                  <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-[#b8860b] opacity-50"></div>
+                  <div className="absolute bottom-6 left-6 w-16 h-16 border-b-2 border-l-2 border-[#b8860b] opacity-50"></div>
+                  <div className="absolute bottom-6 right-6 w-16 h-16 border-b-2 border-r-2 border-[#b8860b] opacity-50"></div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-center mb-1">
-                    <Award className="w-14 h-14 text-amber-500" />
+                  {/* Header */}
+                  <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                      <Award className="w-16 h-16 text-[#d4af37]" />
+                    </div>
+                    <h1 className="font-serif text-4xl md:text-5xl font-bold text-[#1a1a1a] uppercase tracking-widest">
+                      Certificado
+                    </h1>
+                    <h2 className="text-sm font-semibold tracking-[0.3em] text-[#8b6508] uppercase">
+                      de Conclusão de Curso
+                    </h2>
                   </div>
-                  <h2 className="font-black text-2xl md:text-3xl text-amber-400 uppercase tracking-widest leading-none">
-                    Certificado de Conclusão
-                  </h2>
-                  <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">
-                    Web Dev Lab — Jornada Completa
-                  </span>
-                </div>
 
-                <div className="space-y-4 max-w-xl">
-                  <p className="text-xs md:text-sm text-slate-400 italic font-medium leading-relaxed">
-                    Certificamos com honra e distinção técnica que o estudante
-                  </p>
-                  <h3 className="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 tracking-tight py-1 underline decoration-amber-500/30">
-                    {studentName || 'Seu Nome Aqui'}
-                  </h3>
-                  <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium">
-                    concluiu com êxito a <strong>Jornada Completa de Desenvolvimento Web</strong>, dominando
-                    <strong> HTML5</strong>, <strong>CSS3 & Responsividade</strong>, <strong>PHP Server-Side</strong> e a construção de
-                    <strong> Projetos Reais com o Framework Laravel</strong>, incluindo arquitetura MVC, banco de dados MySQL e autenticação de usuários.
-                  </p>
-                </div>
+                  {/* Body Text */}
+                  <div className="text-center max-w-2xl mt-4 z-10">
+                    <p className="text-[#4a4a4a] text-lg font-serif italic mb-4">
+                      Certificamos com honra e distinção técnica que
+                    </p>
+                    <h3 className="text-4xl font-black text-[#1a1a1a] mb-6 font-serif border-b border-[#b8860b] pb-2 px-8 inline-block">
+                      {studentName || 'Nome do Aluno'}
+                    </h3>
+                    <p className="text-[#333333] leading-relaxed text-sm">
+                      concluiu com êxito a <strong>Jornada Completa de Desenvolvimento Web</strong> promovida pelo <strong>Web Dev Lab</strong>, adquirindo proficiência e domínio técnico em <strong>HTML5, CSS3, JavaScript, PHP e Framework Laravel (MVC & MySQL)</strong>.
+                    </p>
+                  </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-t border-slate-900/60 pt-6 w-full max-w-2xl text-xs font-semibold text-slate-500">
-                  <div className="space-y-1">
-                    <span className="font-serif italic text-slate-300 block border-b border-slate-900 pb-1 max-w-[150px] mx-auto select-none">Web Dev Lab Staff</span>
-                    <span className="text-[9px] uppercase tracking-wider block">Assinatura do Instrutor</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="font-black text-amber-500 block border-b border-slate-900 pb-1 max-w-[150px] mx-auto">120 Horas</span>
-                    <span className="text-[9px] uppercase tracking-wider block">Carga Horária</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-slate-300 block border-b border-slate-900 pb-1 max-w-[150px] mx-auto">
-                      {new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </span>
-                    <span className="text-[9px] uppercase tracking-wider block">Data de Emissão</span>
+                  {/* Footer / Signatures */}
+                  <div className="w-full grid grid-cols-3 gap-8 mt-8 text-center text-[#1a1a1a] items-end z-10 relative">
+                    <div className="space-y-1">
+                      <p className="font-bold text-sm">{new Date().toLocaleDateString('pt-BR')}</p>
+                      <div className="w-40 border-t border-[#1a1a1a] mx-auto opacity-30 mt-1"></div>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-[#666]">Data</p>
+                    </div>
+
+                    <div className="space-y-1 flex flex-col items-center">
+                      {/* Seal / Emblem */}
+                      <div className="w-20 h-20 rounded-full border-4 border-dashed border-[#d4af37] flex items-center justify-center bg-[#fdfbf7] relative shadow-lg">
+                        <div className="absolute inset-1 rounded-full border border-[#b8860b]"></div>
+                        <span className="font-serif font-bold text-xs text-[#b8860b] text-center leading-none transform -rotate-12">
+                          120h<br/>Autenticado
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {/* Signature simulation */}
+                      <p className="text-3xl text-[#0f172a] transform -rotate-2 -translate-y-2 opacity-90" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                        Felipe Louzeiro
+                      </p>
+                      <div className="w-48 border-t border-[#1a1a1a] mx-auto opacity-30 mt-1"></div>
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-[#666]">Diretor de Ensino</p>
+                    </div>
                   </div>
                 </div>
               </div>

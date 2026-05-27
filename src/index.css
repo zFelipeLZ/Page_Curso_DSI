@@ -129,3 +129,33 @@ body {
     color: black !important;
   }
 }
+
+/* Print Styles for Certificate */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  #printable-certificate, #printable-certificate * {
+    visibility: visible;
+  }
+  
+  #printable-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: 100vw !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 2cm !important;
+    box-shadow: none !important;
+    background-color: white !important;
+  }
+}
