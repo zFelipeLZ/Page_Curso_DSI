@@ -1391,5 +1391,23 @@ export const getLessonById = (stageId, lessonId) => {
   return stage?.lessons.find(l => l.id === lessonId);
 };
 
+export function getStageStatus(stage, completedLessons) {
+  const lessonIds = stage.lessons.map(l => l.id);
+  const completedCount = lessonIds.filter(id => completedLessons.includes(id)).length;
+  if (completedCount === lessonIds.length) return 'done';
+  if (completedCount > 0) return 'active';
+  return 'pending';
+}
+
+export function isStageUnlocked(stageIndex, stages, completedLessons) {
+  if (stageIndex === 0) return true;
+  const prev = stages[stageIndex - 1];
+  if (prev.optional) {
+    return isStageUnlocked(stageIndex - 1, stages, completedLessons);
+  }
+  const prevStatus = getStageStatus(prev, completedLessons);
+  return prevStatus === 'done';
+}
+
 // Legado — mantido para não quebrar imports antigos durante a transição
 export const CURRICULUM_DATA = {};

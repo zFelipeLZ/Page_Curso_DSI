@@ -1,4 +1,4 @@
-import { STAGES } from '../data/lessonsData';
+import { STAGES, isStageUnlocked } from '../data/lessonsData';
 import {
   LayoutDashboard, BookOpen, Award, Sparkles, GraduationCap,
   Code2, Terminal, Database, ChevronRight, CheckCircle2
@@ -74,28 +74,33 @@ export default function Sidebar({
               Etapas do Curso
             </span>
             <ul className="space-y-0.5">
-              {STAGES.map((stage) => {
+              {STAGES.map((stage, idx) => {
                 const { done, total, pct } = getStageProgress(stage);
                 const isActive = activeView === 'stage' && currentStage === stage.id;
                 const isDone = done === total;
+                const unlocked = isStageUnlocked(idx, STAGES, completedLessons);
                 const colors = TECH_COLORS[stage.tech] || TECH_COLORS['HTML'];
 
                 return (
                   <li key={stage.id}>
                     <button
-                      onClick={() => { onOpenStage(stage.id); close(); }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer group ${
+                      onClick={() => { if (unlocked) { onOpenStage(stage.id); close(); } }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
                         isActive
                           ? 'bg-slate-800 text-slate-200 border border-slate-700/60'
-                          : 'text-slate-500 hover:bg-slate-800/40 hover:text-slate-300'
+                          : unlocked 
+                            ? 'text-slate-500 hover:bg-slate-800/40 hover:text-slate-300 cursor-pointer'
+                            : 'text-slate-700 cursor-not-allowed opacity-50'
                       }`}
                     >
-                      {/* Status dot */}
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : isActive ? colors.dot : 'bg-slate-700'}`} />
+                      {/* Status dot or Lock */}
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${isDone ? 'bg-emerald-400' : isActive ? colors.dot : unlocked ? 'bg-slate-600' : 'bg-slate-800'}`} />
 
                       {/* Label */}
                       <span className="flex-1 text-left leading-snug truncate">
-                        <span className="text-[9px] font-bold text-slate-600 uppercase block">{stage.stageNumber}. {stage.tech}</span>
+                        <span className={`text-[9px] font-bold uppercase block ${unlocked ? 'text-slate-600' : 'text-slate-700'}`}>
+                          {stage.stageNumber}. {stage.tech}
+                        </span>
                         <span className={isDone ? 'text-emerald-400' : isActive ? 'text-slate-200' : ''}>{stage.title}</span>
                       </span>
 
@@ -104,7 +109,7 @@ export default function Sidebar({
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                       ) : (
                         <span className={`text-[9px] font-bold shrink-0 ${isActive ? colors.text : 'text-slate-600'}`}>
-                          {done}/{total}
+                          {unlocked ? `${done}/${total}` : '🔒'}
                         </span>
                       )}
                     </button>

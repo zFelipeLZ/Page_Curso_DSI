@@ -1,4 +1,4 @@
-import { STAGES } from '../data/lessonsData';
+import { STAGES, getStageStatus, isStageUnlocked } from '../data/lessonsData';
 import { 
   CheckCircle2, Lock, PlayCircle, ChevronRight, 
   Sparkles, Star, BookOpen
@@ -12,29 +12,6 @@ const TECH_COLORS = {
   MySQL:   { text: 'text-cyan-400',   bg: 'bg-cyan-500/10',   border: 'border-cyan-500/30', dot: 'bg-cyan-400' },
   Laravel: { text: 'text-rose-400',   bg: 'bg-rose-500/10',   border: 'border-rose-500/30', dot: 'bg-rose-400' },
 };
-
-function getStageStatus(stage, completedLessons) {
-  const lessonIds = stage.lessons.map(l => l.id);
-  const completedCount = lessonIds.filter(id => completedLessons.includes(id)).length;
-  if (completedCount === lessonIds.length) return 'done';
-  if (completedCount > 0) return 'active';
-  return 'pending';
-}
-
-function isStageUnlocked(stageIndex, stages, completedLessons) {
-  if (stageIndex === 0) return true;
-  
-  // JS (index 2) é opcional — não bloqueia o PHP (index 3)
-  // Para acessar a etapa N, a etapa N-1 precisa estar concluída
-  // se N-1 for opcional, verifica a N-2
-  const prev = stages[stageIndex - 1];
-  if (prev.optional) {
-    // Etapa opcional nunca bloqueia a próxima
-    return isStageUnlocked(stageIndex - 1, stages, completedLessons);
-  }
-  const prevStatus = getStageStatus(prev, completedLessons);
-  return prevStatus === 'done';
-}
 
 export default function Dashboard({ onOpenStage, completedLessons, onSwitchView }) {
   const totalRequired = STAGES.filter(s => !s.optional).flatMap(s => s.lessons).length;
