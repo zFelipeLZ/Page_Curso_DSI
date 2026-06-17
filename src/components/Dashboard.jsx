@@ -1,7 +1,7 @@
 import { STAGES, getStageStatus, isStageUnlocked } from '../data/lessonsData';
 import { 
   CheckCircle2, Lock, PlayCircle, ChevronRight, 
-  Sparkles, Star, BookOpen
+  Sparkles, Star, BookOpen, Code2
 } from 'lucide-react';
 
 const TECH_COLORS = {
@@ -13,7 +13,7 @@ const TECH_COLORS = {
   Laravel: { text: 'text-rose-400',   bg: 'bg-rose-500/10',   border: 'border-rose-500/30', dot: 'bg-rose-400' },
 };
 
-export default function Dashboard({ onOpenStage, completedLessons, onSwitchView }) {
+export default function Dashboard({ onOpenStage, completedLessons, onSwitchView, user }) {
   const totalRequired = STAGES.filter(s => !s.optional).flatMap(s => s.lessons).length;
   const completedRequired = STAGES
     .filter(s => !s.optional)
@@ -28,42 +28,73 @@ export default function Dashboard({ onOpenStage, completedLessons, onSwitchView 
     return unlocked && status !== 'done';
   });
 
+  // Extrai o primeiro nome do e-mail (ex: felipe.louzeiro@... -> Felipe)
+  let firstName = 'Estudante';
+  if (user?.email) {
+    const rawName = user.email.split('@')[0].split('.')[0];
+    firstName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+  }
+
   return (
     <div className="space-y-10 animate-fade-in">
 
-      {/* ── Hero Banner ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-8 md:p-12 shadow-xl">
+      {/* ── Hero Banner: WebDev Pro ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-8 shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative max-w-3xl space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            Jornada Completa — Do HTML ao Laravel
+        <div className="relative flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
+          
+          <div className="max-w-2xl space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider preserve-color">
+              <Sparkles className="w-3.5 h-3.5" />
+              Plataforma Premium
+            </div>
+
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+              Bem-vindo de volta, <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">{firstName}!</span>
+            </h2>
+
+            <p className="text-slate-400 text-base md:text-lg leading-relaxed">
+              Você completou <strong className="text-white">{overallPct}%</strong> da sua formação FullStack. 
+              {currentStageIdx >= 0 && STAGES[currentStageIdx] && (
+                <span> Sua próxima parada é <strong className="text-rose-400">{STAGES[currentStageIdx].title}</strong>.</span>
+              )}
+            </p>
+
+            {currentStageIdx >= 0 && STAGES[currentStageIdx] ? (
+              <button 
+                onClick={() => onOpenStage(STAGES[currentStageIdx].id)}
+                className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-white transition-colors shadow-lg shadow-white/5"
+              >
+                <PlayCircle className="w-5 h-5" />
+                Continuar Jornada
+              </button>
+            ) : (
+              <button 
+                onClick={() => onSwitchView('playground')}
+                className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-400 transition-colors shadow-lg shadow-rose-500/20"
+              >
+                <Code2 className="w-5 h-5" />
+                Praticar no Playground
+              </button>
+            )}
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-slate-200 to-rose-400 tracking-tight leading-tight">
-            Sua Jornada para o Desenvolvimento Web
-          </h2>
-
-          <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
-            Siga as <strong className="text-slate-300">8 Etapas</strong> em sequência — de <strong className="text-red-400">HTML</strong> e <strong className="text-blue-400">CSS</strong>, passando por <strong className="text-purple-400">PHP</strong>, até construir um <strong className="text-rose-400">Projeto Real em Laravel</strong>.
-          </p>
-
-          {/* Progress Bar Global */}
-          <div className="space-y-2 pt-2 max-w-lg">
-            <div className="flex justify-between text-xs font-bold text-slate-500">
-              <span>Progresso Geral</span>
-              <span className="text-slate-300">{completedRequired}/{totalRequired} lições</span>
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-36">
+              <BookOpen className="w-5 h-5 text-blue-400 mb-1" />
+              <span className="text-2xl font-black text-slate-100">{completedRequired}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Lições Feitas</span>
             </div>
-            <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-700"
-                style={{ width: `${overallPct}%` }}
-              />
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-36">
+              <Star className="w-5 h-5 text-amber-400 mb-1" />
+              <span className="text-2xl font-black text-slate-100">{overallPct}%</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Progresso</span>
             </div>
-            <p className="text-xs text-slate-500">{overallPct}% concluído (lições obrigatórias)</p>
           </div>
+
         </div>
       </div>
 

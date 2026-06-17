@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* 
 ==================================================
    CUSTOM AESTHETIC STYLES & CORE COMPONENT CSS
@@ -34,8 +36,22 @@
 
 /* Base resets & smooth transitions */
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
+}
+
+/* Light Mode Magic Inversion */
+html.light {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #020617; /* Inverted will become almost white */
+}
+
+html.light img,
+html.light video,
+html.light iframe,
+html.light canvas,
+html.light .preserve-color {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 /* Animations */
@@ -158,4 +174,53 @@ body {
     box-shadow: none !important;
     background-color: white !important;
   }
+}
+
+/* Typography styles for lesson content (since @tailwindcss/typography is not installed) */
+.lesson-content h4 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.lesson-content p {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  color: #cbd5e1;
+  line-height: 1.8;
+}
+
+.lesson-content ul {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.625em;
+  list-style-type: disc;
+  color: #94a3b8;
+}
+
+.lesson-content li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.lesson-content li::marker {
+  color: #475569;
+}
+
+.lesson-content strong {
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.lesson-content code {
+  color: #38bdf8;
+  background-color: rgba(15, 23, 42, 0.6);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }

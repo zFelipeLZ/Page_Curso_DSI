@@ -57,8 +57,32 @@ export const STAGES = [
 </html>`,
         resources: {
           videos: [
-            { title: "HTML para Iniciantes — Curso em Vídeo", url: "https://www.youtube.com/watch?v=epDCjksKMok", duration: "1h 20min" },
-            { title: "Aprenda HTML em 1 Hora — Filipe Deschamps", url: "https://www.youtube.com/watch?v=SV7TL0hxmIQ", duration: "58min" }
+            { 
+              title: "HTML para Iniciantes — Curso em Vídeo", 
+              url: "https://www.youtube.com/watch?v=epDCjksKMok", 
+              duration: "1h 20min",
+              interactiveQuestions: [
+                {
+                  timestampSeconds: 5,
+                  question: "O HTML é considerado uma linguagem de programação?",
+                  options: ["Sim, ele compila código.", "Não, é uma linguagem de marcação.", "Sim, é orientado a objetos."],
+                  correctIndex: 1,
+                  explanation: "Exatamente! HTML significa HyperText Markup Language (Linguagem de Marcação de Hipertexto)."
+                },
+                {
+                  timestampSeconds: 15,
+                  question: "Quais são as tags base obrigatórias de um documento HTML?",
+                  options: ["<header>, <footer> e <main>", "<html>, <head> e <body>", "<nav>, <section> e <div>"],
+                  correctIndex: 1,
+                  explanation: "Toda página precisa da tag <html> englobando o <head> (configurações) e o <body> (conteúdo visual)."
+                }
+              ]
+            },
+            { 
+              title: "Aprenda HTML em 1 Hora — Filipe Deschamps", 
+              url: "https://www.youtube.com/watch?v=SV7TL0hxmIQ", 
+              duration: "58min" 
+            }
           ],
           docs: [
             { title: "MDN — Introdução ao HTML", url: "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML" },
@@ -190,6 +214,80 @@ export const STAGES = [
             { text: "method=\"SEND\"", correct: false }
           ],
           explanation: "POST envia os dados no corpo da requisição HTTP, tornando-os invisíveis na URL. GET coloca os dados na URL (ex: ?senha=123), o que é perigoso para informações sensíveis."
+        }
+      },
+      {
+        id: "html-aria",
+        title: "4. Acessibilidade e ARIA",
+        level: "Intermediário",
+        badge: "A11y",
+        description: "Torne suas páginas acessíveis para todos, incluindo usuários de leitores de tela.",
+        content: `
+          <p>Acessibilidade (<strong>a11y</strong>) garante que pessoas com deficiência visual, motora ou cognitiva consigam usar seu site. Na prática, isso impacta também o SEO — o Google interpreta código acessível como conteúdo de qualidade.</p>
+
+          <h4>A Regra de Ouro do ARIA:</h4>
+          <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 my-4 text-amber-300 text-sm">
+            ⚠️ <strong>Importante:</strong> "Nunca use ARIA quando um elemento HTML semântico nativo resolve o problema." Um <code>&lt;button&gt;</code> já é acessível. Um <code>&lt;div role="button"&gt;</code> é um remendo.
+          </div>
+
+          <h4>Os 3 pilares do ARIA:</h4>
+          <ul class="list-disc pl-6 space-y-3 my-3 text-slate-300">
+            <li><code>role</code> — Define <em>o que</em> o elemento é semanticamente. Ex: <code>role="dialog"</code>, <code>role="alert"</code>.</li>
+            <li><code>aria-label</code> — Fornece um rótulo para leitores de tela quando não há texto visível. Ex: botão de fechar (X) precisa de <code>aria-label="Fechar modal"</code>.</li>
+            <li><code>aria-hidden="true"</code> — Oculta elementos decorativos (ícones, separadores) dos leitores de tela.</li>
+          </ul>
+
+          <h4>aria-expanded e estados dinâmicos:</h4>
+          <p>Menus suspensos devem alternar <code>aria-expanded="true/false"</code> via JavaScript, comunicando o estado ao leitor de tela em tempo real.</p>
+
+          <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 my-4 text-emerald-300 text-sm">
+            ✅ <strong>Dica profissional:</strong> Use a extensão gratuita <strong>axe DevTools</strong> no Chrome para auditar acessibilidade automaticamente durante o desenvolvimento.
+          </div>
+        `,
+        demoCode: `<!-- Navegação acessível -->
+<nav aria-label="Menu principal de navegação">
+  <ul>
+    <!-- aria-current="page" indica a página ativa -->
+    <li><a href="/home" aria-current="page">Início</a></li>
+    <li><a href="/cursos">Cursos</a></li>
+  </ul>
+</nav>
+
+<!-- Botão com ícone: aria-label obrigatório! -->
+<button aria-label="Fechar modal de confirmação">
+  <!-- aria-hidden oculta o ícone decorativo do leitor de tela -->
+  <svg aria-hidden="true">...</svg>
+</button>
+
+<!-- Modal acessível com role e aria-modal -->
+<div 
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-titulo"
+  aria-describedby="modal-descricao"
+>
+  <h2 id="modal-titulo">Confirmar Exclusão</h2>
+  <p id="modal-descricao">Esta ação não pode ser desfeita.</p>
+</div>`,
+        resources: {
+          videos: [
+            { title: "Acessibilidade Web para Iniciantes — ARIA explicado", url: "https://www.youtube.com/watch?v=0hqhAIjE_8I", duration: "18min" },
+            { title: "HTML Semântico e Acessibilidade — Código Fonte TV", url: "https://www.youtube.com/watch?v=7LMl8tyqMiM", duration: "12min" }
+          ],
+          docs: [
+            { title: "MDN — ARIA: Funções, Estados e Propriedades", url: "https://developer.mozilla.org/pt-BR/docs/Web/Accessibility/ARIA" },
+            { title: "W3C — Diretrizes de Acessibilidade (WCAG 2.1)", url: "https://www.w3.org/WAI/WCAG21/quickref/" }
+          ]
+        },
+        quiz: {
+          question: "Qual atributo ARIA deve ser adicionado a um botão que contém APENAS um ícone (sem texto visível) para torná-lo acessível a leitores de tela?",
+          options: [
+            { text: "role=\"button\"", correct: false },
+            { text: "aria-hidden=\"true\"", correct: false },
+            { text: "aria-label=\"Descrição da ação\"", correct: true },
+            { text: "tabindex=\"0\"", correct: false }
+          ],
+          explanation: "aria-label fornece um rótulo textual alternativo visível apenas a tecnologias assistivas. aria-hidden='true' faria o oposto — esconderia o elemento inteiramente. Botões sem texto visível SEMPRE precisam de aria-label."
         }
       }
     ]
@@ -389,6 +487,109 @@ body {
           ],
           explanation: "Mobile First é a abordagem recomendada porque garante performance em celulares (que têm mais limitações) e usa @media (min-width) para adicionar complexidade progressivamente em telas maiores."
         }
+      },
+      {
+        id: "css-grid-variables",
+        title: "4. CSS Grid e Variáveis CSS",
+        level: "Intermediário",
+        badge: "Design System",
+        description: "Crie layouts bidimensionais complexos com Grid e construa Design Systems escaláveis com variáveis CSS.",
+        content: `
+          <h4>CSS Grid: Layout Bidimensional</h4>
+          <p>Enquanto o Flexbox é ideal para uma dimensão (linha OU coluna), o <strong>CSS Grid</strong> controla simultaneamente linhas E colunas — perfeito para dashboards, galerias e layouts de página completos.</p>
+
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><code>display: grid</code> — Ativa o Grid no elemento.</li>
+            <li><code>grid-template-columns</code> — Define as colunas. Ex: <code>280px 1fr</code> (sidebar + área principal).</li>
+            <li><code>gap</code> — Espaçamento entre colunas e linhas simultaneamente.</li>
+            <li><code>grid-column: span 2</code> — Faz um elemento ocupar 2 colunas.</li>
+          </ul>
+
+          <h4>Variáveis CSS com :root — Design System</h4>
+          <p>Variáveis CSS (Custom Properties) são a diferença entre um CSS manutenível e um CSS que ninguém quer tocar. Ao centralizar cores, fontes e espaçamentos no <code>:root</code>, você cria um <strong>Design System</strong> escalável.</p>
+
+          <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 my-4 text-emerald-300 text-sm">
+            ✅ <strong>Vantagem real:</strong> Se o cliente pedir para mudar a cor primária da aplicação, você edita <strong>um único lugar</strong> no :root e toda a interface atualiza automaticamente.
+          </div>
+
+          <h4>Unidade <code>fr</code> (fraction):</h4>
+          <p>A unidade <code>fr</code> representa uma fração do espaço disponível. <code>grid-template-columns: 1fr 2fr 1fr</code> cria 3 colunas onde a do meio é o dobro das laterais.</p>
+        `,
+        demoCode: `/* 1. Design System com Variáveis CSS no :root */
+:root {
+  /* Cores — fonte única da verdade */
+  --cor-primaria: #3b82f6;
+  --cor-fundo: #0f172a;
+  --cor-superficie: #1e293b;
+  --cor-texto: #e2e8f0;
+  
+  /* Espaçamento em escala de 4px */
+  --espaco-sm: 0.5rem;    /* 8px */
+  --espaco-md: 1rem;      /* 16px */
+  --espaco-lg: 1.5rem;    /* 24px */
+  
+  /* Transições */
+  --transicao: all 0.3s ease;
+}
+
+/* Usando as variáveis */
+.botao-primario {
+  background-color: var(--cor-primaria);
+  padding: var(--espaco-sm) var(--espaco-md);
+  transition: var(--transicao);
+}
+
+/* 2. Layout com CSS Grid */
+.dashboard {
+  display: grid;
+  /* 280px fixo para sidebar, restante para o conteúdo */
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr; /* Header auto, conteúdo expande */
+  gap: var(--espaco-lg);
+  min-height: 100vh;
+}
+
+/* Grid de cards 3 colunas */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colunas iguais */
+  gap: var(--espaco-md);
+}
+
+/* Card que ocupa a linha inteira */
+.card-destaque {
+  grid-column: 1 / -1; /* Do início ao fim */
+}
+
+/* Responsivo: 1 coluna no mobile */
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr; /* Coluna única */
+  }
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+}`,
+        resources: {
+          videos: [
+            { title: "CSS Grid em 20 minutos — Traversy Media (legendado)", url: "https://www.youtube.com/watch?v=0xMQfnTU6oo", duration: "20min" },
+            { title: "CSS Grid completo — Origamid", url: "https://www.youtube.com/watch?v=HB1ZnMrIqA4", duration: "1h 10min" }
+          ],
+          docs: [
+            { title: "CSS Grid Garden — Jogo Interativo de Grid", url: "https://cssgridgarden.com/#pt-br" },
+            { title: "Guia Completo de CSS Grid — CSS-Tricks", url: "https://css-tricks.com/snippets/css/complete-guide-grid/" }
+          ]
+        },
+        quiz: {
+          question: "Qual é a principal diferença entre CSS Flexbox e CSS Grid que determina quando usar cada um?",
+          options: [
+            { text: "Flexbox é mais moderno e deve sempre ser preferido ao Grid", correct: false },
+            { text: "Flexbox controla UMA dimensão (linha OU coluna); Grid controla DUAS dimensões (linhas E colunas) simultaneamente", correct: true },
+            { text: "Grid só funciona em navegadores modernos, enquanto Flexbox é compatível com todos", correct: false },
+            { text: "Flexbox requer JavaScript para funcionar corretamente", correct: false }
+          ],
+          explanation: "Use Flexbox para componentes internos (barra de navegação, lista de botões). Use Grid para estrutura da página (layout com sidebar, grid de cards). Eles se complementam e são frequentemente usados juntos no mesmo projeto."
+        }
       }
     ]
   },
@@ -515,6 +716,113 @@ btn.addEventListener('click', () => {
             { text: "document.getElement()", correct: false }
           ],
           explanation: "querySelector() aceita qualquer seletor CSS válido (.classe, #id, tag) e retorna o primeiro elemento correspondente. É o método mais moderno e versátil para seleção no DOM."
+        }
+      },
+      {
+        id: "js-async",
+        title: "3. Assincronismo e fetch()",
+        level: "Avançado",
+        badge: "APIs e HTTP",
+        description: "Entenda o Event Loop e consuma APIs REST externas com fetch(), async/await e tratamento de erros robusto.",
+        content: `
+          <h4>O Problema da Sincronia</h4>
+          <p>O JavaScript é <strong>single-threaded</strong> — possui apenas um fio de execução. Se ele precisasse esperar uma resposta de rede (que pode levar 3 segundos), a página inteira congelaria.</p>
+
+          <h4>Como o Event Loop resolve isso:</h4>
+          <ol class="list-decimal pl-6 space-y-2 my-3 text-slate-300">
+            <li>Seu código chama <code>fetch()</code> — a requisição é <strong>delegada</strong> ao browser.</li>
+            <li>O fio principal JS <strong>continua</strong> executando o restante do código.</li>
+            <li>Quando a resposta chega, o callback entra na fila de microtasks.</li>
+            <li>Quando a Call Stack esvazia, o Event Loop executa o callback.</li>
+          </ol>
+
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Analogia:</strong> É como pedir comida em um restaurante. O garçom (Event Loop) não fica parado na cozinha esperando. Ele anota seu pedido e atende outras mesas. Quando fica pronto, ele serve.
+          </div>
+
+          <h4>async/await — Código assíncrono legível:</h4>
+          <p><code>async/await</code> é açúcar sintático sobre Promises. Torna código assíncrono tão legível quanto código síncrono.</p>
+
+          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 my-4 text-red-300 text-sm">
+            ⚠️ <strong>Armadilha comum:</strong> <code>fetch()</code> NÃO lança erro para respostas HTTP 404 ou 500. Ele só rejeita se houver falha de rede. Sempre verifique <code>response.ok</code> manualmente!
+          </div>
+        `,
+        demoCode: `// Consultando a API de CEP (ViaCEP) de forma profissional
+
+const buscarEnderecoPorCep = async (cepDigitado) => {
+  // Sanitiza: remove traços e espaços
+  const cep = cepDigitado.replace(/\\D/g, '');
+  
+  if (cep.length !== 8) {
+    throw new Error('CEP deve ter 8 dígitos.');
+  }
+  
+  try {
+    // fetch() retorna uma Promise — await pausa aqui
+    const resposta = await fetch(\`https://viacep.com.br/ws/\${cep}/json/\`);
+    
+    // ARMADILHA: status 404 não rejeita a Promise!
+    if (!resposta.ok) {
+      throw new Error(\`Erro HTTP: \${resposta.status}\`);
+    }
+    
+    const dados = await resposta.json();
+    
+    // ViaCEP retorna { erro: true } para CEPs inexistentes
+    if (dados.erro) {
+      throw new Error('CEP não encontrado nos Correios.');
+    }
+    
+    return {
+      rua: dados.logradouro,
+      bairro: dados.bairro,
+      cidade: dados.localidade,
+      estado: dados.uf,
+    };
+    
+  } catch (erro) {
+    // Captura: falha de rede, CEP inválido, erro HTTP
+    console.error('[BuscaCEP]', erro.message);
+    throw erro; // Relança para o chamador decidir
+  }
+};
+
+// Uso na página
+document.getElementById('btn-buscar').addEventListener('click', async () => {
+  const cep = document.getElementById('input-cep').value;
+  const div = document.getElementById('resultado');
+  
+  div.textContent = 'Buscando...';
+  
+  try {
+    const endereco = await buscarEnderecoPorCep(cep);
+    div.innerHTML = \`
+      <strong>\${endereco.rua}</strong><br>
+      \${endereco.bairro} — \${endereco.cidade}/\${endereco.estado}
+    \`;
+  } catch (e) {
+    div.textContent = 'Erro: ' + e.message;
+  }
+});`,
+        resources: {
+          videos: [
+            { title: "Fetch API e Async/Await — Traversy Media (legendado)", url: "https://www.youtube.com/watch?v=cuEtnrL9-H0", duration: "30min" },
+            { title: "JavaScript Assíncrono completo — Rocketseat", url: "https://www.youtube.com/watch?v=xyNDP_wFDFk", duration: "45min" }
+          ],
+          docs: [
+            { title: "MDN — Como usar Promises", url: "https://developer.mozilla.org/pt-BR/docs/Learn/JavaScript/Asynchronous/Promises" },
+            { title: "javascript.info — async/await", url: "https://javascript.info/async-await" }
+          ]
+        },
+        quiz: {
+          question: "Você fez um fetch() para uma API e recebeu uma resposta. O response.ok retornou FALSE (status 404). O que acontece automaticamente?",
+          options: [
+            { text: "O bloco catch() é acionado automaticamente", correct: false },
+            { text: "A Promise é rejeitada e o erro é capturado pelo try/catch", correct: false },
+            { text: "Nada — o fetch() resolve normalmente. É necessário verificar response.ok e lançar o erro manualmente", correct: true },
+            { text: "O JavaScript exibe um alert() ao usuário automaticamente", correct: false }
+          ],
+          explanation: "Esta é a armadilha mais comum com fetch(). Ele só rejeita a Promise em falhas de REDE (internet off, CORS, timeout). Erros HTTP (404, 500) são respostas válidas para o fetch — você deve checar response.ok e lançar um erro manualmente com throw new Error()."
         }
       }
     ]
@@ -698,6 +1006,112 @@ echo "Usuário encontrado: " . $usuario['nome'];
           ],
           explanation: "Prepared Statements pré-compilam a estrutura da query SQL antes de receber os dados. Assim, mesmo que o usuário injete código malicioso, ele é tratado como texto simples, nunca como instrução SQL."
         }
+      },
+      {
+        id: "php-oo",
+        title: "4. PHP Orientado a Objetos (POO)",
+        level: "Avançado",
+        badge: "POO",
+        description: "Domine Classes, Objetos, Encapsulamento e Herança para construir código PHP organizado e reutilizável.",
+        content: `
+          <p>A <strong>Programação Orientada a Objetos (POO)</strong> é o paradigma dominante no desenvolvimento web profissional. Em vez de funções soltas e variáveis globais, organizamos o código em <strong>Classes</strong> (moldes) e <strong>Objetos</strong> (instâncias concretas).</p>
+
+          <h4>Por que usar POO?</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><strong>Organização:</strong> Cada classe tem uma responsabilidade clara (ex: a classe <code>Aluno</code> gerencia apenas dados de alunos).</li>
+            <li><strong>Reutilização:</strong> Escreva uma vez, use em qualquer lugar.</li>
+            <li><strong>Encapsulamento:</strong> Protege os dados internos contra modificações acidentais.</li>
+          </ul>
+
+          <h4>Visibilidade das Propriedades:</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><code>public</code> — Acessível de qualquer lugar.</li>
+            <li><code>private</code> — Somente dentro da própria classe. Use para dados sensíveis.</li>
+            <li><code>protected</code> — Acessível na classe e suas subclasses (herança).</li>
+          </ul>
+
+          <h4>Getters e Setters:</h4>
+          <p>Métodos públicos que controlam o acesso às propriedades privadas, permitindo <strong>validação</strong> antes de salvar um valor (ex: "a idade não pode ser negativa").</p>
+
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Regra de Clean Code:</strong> Sempre declare propriedades como <code>private</code> por padrão e exponha apenas o que for necessário via métodos públicos.
+          </div>
+        `,
+        demoCode: `<?php
+// Arquivo: Aluno.php
+
+class Aluno {
+    // Propriedades privadas: só acessíveis dentro da classe
+    private string $nome;
+    private string $matricula;
+    private int $idade;
+
+    // __construct: executado automaticamente com "new Aluno()"
+    public function __construct(string $nome, string $matricula, int $idade) {
+        // Usa o setter para forçar validação já na criação!
+        $this->setNome($nome);
+        $this->matricula = $matricula;
+        $this->setIdade($idade);
+    }
+
+    // SETTER com validação de negócio
+    public function setNome(string $nome): void {
+        if (mb_strlen(trim($nome)) < 2) {
+            throw new InvalidArgumentException("Nome muito curto.");
+        }
+        $this->nome = htmlspecialchars(trim($nome));
+    }
+
+    public function setIdade(int $idade): void {
+        if ($idade < 0 || $idade > 120) {
+            throw new InvalidArgumentException("Idade inválida: $idade");
+        }
+        $this->idade = $idade;
+    }
+
+    // GETTERS para leitura pública
+    public function getNome(): string { return $this->nome; }
+    public function getIdade(): int { return $this->idade; }
+
+    // Método de comportamento do objeto
+    public function apresentar(): string {
+        return "{$this->nome} | Matrícula: {$this->matricula} | Idade: {$this->idade}";
+    }
+}
+
+// Instanciando o objeto
+try {
+    $aluno = new Aluno("Felipe Santos", "2026-001", 22);
+    echo $aluno->apresentar();
+    // Saída: Felipe Santos | Matrícula: 2026-001 | Idade: 22
+    
+    // $aluno->nome = "Hack"; // ERRO FATAL — private!
+    // $aluno->setIdade(-5); // Lança InvalidArgumentException
+    
+} catch (InvalidArgumentException $e) {
+    echo "Erro: " . $e->getMessage();
+}
+?>`,
+        resources: {
+          videos: [
+            { title: "PHP OO Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=txMiwMF0U3M", duration: "2h 30min" },
+            { title: "Orientação a Objetos em PHP — Laracasts (EN)", url: "https://www.youtube.com/watch?v=AnVGEGQnGq0", duration: "25min" }
+          ],
+          docs: [
+            { title: "PHP Manual — Classes e Objetos", url: "https://www.php.net/manual/pt_BR/language.oop5.php" },
+            { title: "PHP do Zero ao Avançado — Dev Media", url: "https://www.devmedia.com.br/php-orientado-a-objetos/26762" }
+          ]
+        },
+        quiz: {
+          question: "Por que é uma boa prática declarar propriedades de uma classe PHP como 'private' ao invés de 'public'?",
+          options: [
+            { text: "Propriedades private são processadas mais rápido pelo PHP", correct: false },
+            { text: "Propriedades private impedem que código externo modifique os dados diretamente sem passar pela validação dos setters", correct: true },
+            { text: "Propriedades private são obrigatórias para que o construtor funcione", correct: false },
+            { text: "Não há diferença prática — é apenas uma questão de estilo", correct: false }
+          ],
+          explanation: "Encapsulamento garante que os dados de um objeto só sejam alterados de forma controlada. Com private, qualquer modificação passa obrigatoriamente pelo setter, onde você pode validar regras de negócio (ex: bloquear idades negativas) antes de persistir o valor."
+        }
       }
     ]
   },
@@ -810,6 +1224,175 @@ DELETE FROM usuarios WHERE id = 1;`,
             { text: "O comando criará cópias dos registros.", correct: false }
           ],
           explanation: "O WHERE define o alvo (ex: WHERE id = 1). Sem ele, o banco entende que a regra se aplica a todas as linhas. Exemplo: DELETE FROM usuarios (apaga todo mundo)."
+        }
+      },
+      {
+        id: "mysql-normalizacao",
+        title: "3. Normalização e Relacionamentos",
+        level: "Intermediário",
+        badge: "Modelagem",
+        description: "Projete bancos de dados eficientes com chaves estrangeiras e as Formas Normais (1FN → 3FN).",
+        content: `
+          <p>Um banco de dados mal projetado <strong>armazena dados duplicados</strong>, tornando as atualizações trabalhosas e propensas a inconsistências. A <strong>Normalização</strong> é o processo de organizar as tabelas para eliminar redundância.</p>
+
+          <h4>O Problema da Não-Normalização:</h4>
+          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 my-4 text-red-300 text-sm">
+            ❌ <strong>Problema:</strong> Imagina uma tabela de pedidos com as colunas: <code>id | cliente_nome | cliente_email | produto | preco</code>. Se o cliente mudar o e-mail, você precisa atualizar TODOS os pedidos dele. Se deletar o último pedido, você perde o cadastro do cliente!
+          </div>
+
+          <h4>1FN — Primeira Forma Normal (Atomicidade):</h4>
+          <p>Cada coluna deve ter um único valor atômico. Proibido guardar listas separadas por vírgula em uma célula (ex: <code>cursos: "HTML,CSS,PHP"</code>). Crie uma tabela separada para relacionar.</p>
+
+          <h4>2FN — Segunda Forma Normal (Dependência Total):</h4>
+          <p>Todos os atributos não-chave devem depender da chave primária <em>inteira</em>. Elimina dependências parciais em chaves compostas.</p>
+
+          <h4>3FN — Terceira Forma Normal (Sem Dependências Transitivas):</h4>
+          <p>Atributos não-chave não podem depender de outros atributos não-chave. Se <em>nome_cidade</em> depende de <em>cep</em>, que por sua vez depende de <em>id</em> — mova <em>nome_cidade</em> para uma tabela de CEPs.</p>
+
+          <h4>Chave Estrangeira (FOREIGN KEY):</h4>
+          <p>Garante integridade referencial. Se você tem um pedido com <code>cliente_id = 5</code>, o MySQL <strong>impede deletar</strong> o cliente 5 enquanto existirem pedidos vinculados.</p>
+        `,
+        demoCode: `-- ANTES da normalização (problema):
+-- pedidos: id | cliente_nome | cliente_email | produto_nome | produto_preco
+-- Se o email mudar → atualizar TODAS as linhas!
+
+-- DEPOIS da normalização (correto):
+
+-- Tabela de Clientes (responsabilidade: dados do cliente)
+CREATE TABLE clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL
+);
+
+-- Tabela de Produtos
+CREATE TABLE produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    preco DECIMAL(10, 2) NOT NULL CHECK (preco > 0)
+);
+
+-- Tabela de Pedidos (armazena APENAS a relação + dados únicos do pedido)
+CREATE TABLE pedidos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    produto_id INT NOT NULL,
+    quantidade INT DEFAULT 1,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Chaves estrangeiras garantem integridade
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+        ON DELETE RESTRICT    -- Impede deletar cliente com pedidos
+        ON UPDATE CASCADE,    -- Atualiza automaticamente se o ID mudar
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+        ON DELETE RESTRICT
+);
+
+-- Agora, mudar o email do cliente → 1 UPDATE apenas na tabela clientes!
+UPDATE clientes SET email = 'novo@email.com' WHERE id = 5;`,
+        resources: {
+          videos: [
+            { title: "Normalização de Banco de Dados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=GFQaEYEc8_8", duration: "40min" },
+            { title: "Modelo Relacional e Chaves Estrangeiras", url: "https://www.youtube.com/watch?v=8wHpZDuIBmc", duration: "25min" }
+          ],
+          docs: [
+            { title: "MySQL — FOREIGN KEY Constraints", url: "https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html" },
+            { title: "Guia de Normalização — W3Schools", url: "https://www.w3schools.com/sql/sql_ref_normalization.asp" }
+          ]
+        },
+        quiz: {
+          question: "Qual é a principal função de uma FOREIGN KEY (Chave Estrangeira) em um banco de dados relacional?",
+          options: [
+            { text: "Criar um índice automático para acelerar consultas", correct: false },
+            { text: "Garantir a integridade referencial — impedir que um registro filho aponte para um pai inexistente", correct: true },
+            { text: "Criptografar os dados armazenados na coluna", correct: false },
+            { text: "Criar uma coluna de identificação única auto-incrementada", correct: false }
+          ],
+          explanation: "A FOREIGN KEY estabelece um vínculo entre tabelas. Se cliente_id em pedidos referencia clientes.id, o MySQL impede: 1) inserir um pedido com cliente_id que não existe; 2) deletar um cliente que tem pedidos vinculados (com ON DELETE RESTRICT). Isso garante consistência dos dados."
+        }
+      },
+      {
+        id: "mysql-joins",
+        title: "4. JOINs e Agrupamentos",
+        level: "Avançado",
+        badge: "Consultas Avançadas",
+        description: "Combine dados de múltiplas tabelas com JOINs e crie relatórios com GROUP BY e funções de agregação.",
+        content: `
+          <p>No banco normalizado, os dados estão em tabelas separadas. O <strong>JOIN</strong> é o mecanismo SQL para combiná-los em uma única consulta, sem duplicar dados no banco.</p>
+
+          <h4>Tipos de JOIN:</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><code>INNER JOIN</code> — Retorna apenas os registros que têm correspondência nas DUAS tabelas. O mais comum.</li>
+            <li><code>LEFT JOIN</code> — Retorna TODOS os registros da tabela esquerda, mesmo sem correspondência na direita (resulta em NULL).</li>
+            <li><code>RIGHT JOIN</code> — O oposto do LEFT JOIN. Menos usado.</li>
+          </ul>
+
+          <h4>Funções de Agregação com GROUP BY:</h4>
+          <p>Agrupam linhas e calculam estatísticas: <code>COUNT()</code>, <code>SUM()</code>, <code>AVG()</code>, <code>MAX()</code>, <code>MIN()</code>.</p>
+
+          <h4>Quando usar LEFT JOIN vs INNER JOIN:</h4>
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Regra prática:</strong> Use INNER JOIN quando ambos os lados sempre terão correspondência (pedido sempre tem cliente). Use LEFT JOIN quando o lado direito pode não existir (listar todos os clientes, mesmo sem pedidos).
+          </div>
+        `,
+        demoCode: `-- Exemplo 1: INNER JOIN - Buscar pedidos com dados do cliente e produto
+SELECT 
+    p.id           AS pedido_id,
+    c.nome         AS cliente,
+    c.email        AS email_cliente,
+    pr.nome        AS produto,
+    pr.preco       AS valor_unitario,
+    p.quantidade,
+    (pr.preco * p.quantidade) AS total,
+    p.criado_em
+FROM pedidos p
+    INNER JOIN clientes c  ON p.cliente_id = c.id
+    INNER JOIN produtos  pr ON p.produto_id  = pr.id
+WHERE p.criado_em >= '2026-01-01'
+ORDER BY p.criado_em DESC;
+
+-- Exemplo 2: LEFT JOIN - Clientes SEM nenhum pedido
+SELECT 
+    c.id, 
+    c.nome, 
+    c.email,
+    COUNT(p.id) AS total_pedidos  -- 0 para clientes sem pedidos
+FROM clientes c
+    LEFT JOIN pedidos p ON c.id = p.cliente_id
+GROUP BY c.id, c.nome, c.email
+HAVING COUNT(p.id) = 0;  -- Filtra apenas os sem pedidos
+
+-- Exemplo 3: Relatório de vendas por produto (GROUP BY + SUM)
+SELECT 
+    pr.nome                          AS produto,
+    COUNT(p.id)                      AS qtd_pedidos,
+    SUM(p.quantidade)                AS unidades_vendidas,
+    SUM(pr.preco * p.quantidade)     AS faturamento_total,
+    AVG(pr.preco * p.quantidade)     AS ticket_medio
+FROM pedidos p
+    INNER JOIN produtos pr ON p.produto_id = pr.id
+GROUP BY pr.id, pr.nome
+ORDER BY faturamento_total DESC
+LIMIT 10;  -- Top 10 produtos mais vendidos`,
+        resources: {
+          videos: [
+            { title: "SQL JOINs explicados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=Jh_pvk48jHA", duration: "35min" },
+            { title: "GROUP BY e Funções de Agregação em SQL", url: "https://www.youtube.com/watch?v=ufagbDYiH-M", duration: "20min" }
+          ],
+          docs: [
+            { title: "MySQL — JOIN Syntax", url: "https://dev.mysql.com/doc/refman/8.0/en/join.html" },
+            { title: "SQL JOINs Guia Visual — W3Schools", url: "https://www.w3schools.com/sql/sql_join.asp" }
+          ]
+        },
+        quiz: {
+          question: "Você quer listar TODOS os clientes, incluindo os que nunca fizeram pedidos (mostrando 0 no campo de total). Qual tipo de JOIN é correto?",
+          options: [
+            { text: "INNER JOIN — retorna apenas linhas com correspondência nas duas tabelas", correct: false },
+            { text: "LEFT JOIN — retorna todos da tabela esquerda (clientes), com NULL onde não há pedidos", correct: true },
+            { text: "RIGHT JOIN — retorna todos da tabela direita (pedidos)", correct: false },
+            { text: "CROSS JOIN — combina cada cliente com cada pedido", correct: false }
+          ],
+          explanation: "LEFT JOIN (ou LEFT OUTER JOIN) retorna TODOS os registros da tabela à esquerda (clientes) e os campos correspondentes da tabela da direita (pedidos). Para clientes sem pedidos, as colunas de pedidos retornam NULL — que podemos converter em 0 com COUNT() ou COALESCE()."
         }
       }
     ]
@@ -1091,6 +1674,157 @@ $produtos = Produto::where('estoque', '>', 0)
           ],
           explanation: "O flag -m (abreviação de --migration) diz ao Artisan para criar a migration junto com a Model. É um atalho poderoso que agiliza muito a criação de novas entidades no sistema."
         }
+      },
+      {
+        id: "laravel-scopes",
+        title: "3. Eloquent Avançado: Scopes e Relacionamentos",
+        level: "Avançado",
+        badge: "ORM Avançado",
+        description: "Encapsule consultas complexas com Query Scopes e domine relacionamentos (HasMany, BelongsTo) com Eager Loading.",
+        content: `
+          <h4>Query Scopes</h4>
+          <p>Scopes permitem que você encapsule lógicas de consulta comuns dentro do seu Model, tornando o código do Controller muito mais limpo e legível. Em vez de repetir <code>where('ativo', 1)->where('estoque', '>', 0)</code> em vários lugares, você cria um scope <code>ativosEComEstoque()</code>.</p>
+
+          <h4>Relacionamentos no Eloquent</h4>
+          <p>O Eloquent facilita o relacionamento entre tabelas sem precisar escrever SQL JOINs complexos:</p>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300 text-sm">
+            <li><code>hasMany()</code> — Um para Muitos (Ex: Um Cliente tem muitos Pedidos).</li>
+            <li><code>belongsTo()</code> — Pertence a (Ex: O Pedido pertence a um Cliente).</li>
+          </ul>
+
+          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 my-4 text-red-300 text-sm">
+            ⚠️ <strong>O Problema do N+1:</strong> Se você buscar 100 pedidos e, dentro de um loop, tentar acessar o cliente de cada um, o Laravel fará 1 consulta + 100 consultas = 101 queries! Resolva isso com <strong>Eager Loading</strong> usando o método <code>with('cliente')</code>.
+          </div>
+        `,
+        demoCode: `// 1. Definindo Scopes e Relacionamentos no Model
+class Produto extends Model
+{
+    // Local Scope (prefixo 'scope')
+    public function scopeDisponiveis($query)
+    {
+        return $query->where('ativo', true)
+                     ->where('estoque', '>', 0);
+    }
+
+    // Relacionamento (Um Produto pertence a uma Categoria)
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
+    }
+}
+
+// 2. Usando no Controller
+// Usando o scope 'disponiveis' e Eager Loading (with) para evitar N+1
+$produtos = Produto::with('categoria')
+                   ->disponiveis()
+                   ->orderBy('preco', 'asc')
+                   ->get();
+
+// Na view (Blade), acessar a categoria não fará nova query SQL!
+// {{ $produto->categoria->nome }}`,
+        resources: {
+          videos: [
+            { title: "Laravel Eager Loading (Evitando N+1) — Coder's Tape", url: "https://www.youtube.com/watch?v=JwwR758IeEY", duration: "18min" }
+          ],
+          docs: [
+            { title: "Laravel — Local Scopes", url: "https://laravel.com/docs/11.x/eloquent#local-scopes" },
+            { title: "Laravel — Eloquent Relationships", url: "https://laravel.com/docs/11.x/eloquent-relationships" }
+          ]
+        },
+        quiz: {
+          question: "Como o Laravel resolve o problema clássico de 'N+1 queries' ao listar itens e seus relacionamentos (ex: listar 50 posts e o autor de cada post)?",
+          options: [
+            { text: "Aumentando a memória RAM do PHP no servidor", correct: false },
+            { text: "Usando o método with() (Eager Loading) para carregar os relacionamentos na consulta principal", correct: true },
+            { text: "O Laravel resolve o problema sozinho magicamente, não é preciso fazer nada", correct: false },
+            { text: "Usando Raw SQL para escrever JOINs manuais", correct: false }
+          ],
+          explanation: "O Eager Loading (carregamento antecipado) através do método with('relacionamento') reduz drasticamente o número de queries de N+1 para apenas 2 queries: uma para buscar os posts e outra (usando WHERE IN) para buscar todos os autores correspondentes."
+        }
+      },
+      {
+        id: "laravel-requests",
+        title: "4. Validação e Form Requests",
+        level: "Intermediário",
+        badge: "Segurança",
+        description: "Isole a lógica de validação de formulários fora do Controller usando Form Requests.",
+        content: `
+          <p>O Laravel facilita a validação de dados recebidos (POST/PUT). Em vez de poluir seu Controller com dezenas de regras de "if/else", a melhor prática de Clean Code é usar <strong>Form Requests</strong>.</p>
+
+          <h4>O que é um Form Request?</h4>
+          <p>É uma classe dedicada à validação de uma requisição específica (ex: <code>StoreProdutoRequest</code>). O Laravel a executa <em>antes</em> mesmo de o código chegar no Controller!</p>
+
+          <h4>Vantagens:</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300 text-sm">
+            <li><strong>Separação de Responsabilidades:</strong> O Controller foca apenas no fluxo de negócio.</li>
+            <li><strong>Reutilização:</strong> Regras de validação centralizadas.</li>
+            <li><strong>Autorização embutida:</strong> Possui um método <code>authorize()</code> para verificar se o usuário tem permissão para a ação.</li>
+          </ul>
+
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Comando mágico:</strong> <code>php artisan make:request StoreProdutoRequest</code>
+          </div>
+        `,
+        demoCode: `// 1. Criando o Form Request
+// app/Http/Requests/StoreProdutoRequest.php
+class StoreProdutoRequest extends FormRequest
+{
+    public function authorize()
+    {
+        // Apenas admins podem criar produtos
+        return auth()->user()->is_admin;
+    }
+
+    public function rules()
+    {
+        return [
+            'nome' => 'required|string|min:3|max:100|unique:produtos',
+            'preco' => 'required|numeric|min:0.01',
+            'categoria_id' => 'required|exists:categorias,id'
+        ];
+    }
+    
+    public function messages()
+    {
+        return [
+            'nome.required' => 'O nome do produto é obrigatório!',
+            'nome.unique' => 'Já existe um produto com este nome.'
+        ];
+    }
+}
+
+// 2. Usando no Controller
+// A injeção de dependência já valida automaticamente!
+public function store(StoreProdutoRequest $request)
+{
+    // Se chegou aqui, os dados estão válidos E o usuário é admin!
+    
+    // Pega apenas os dados validados de forma segura
+    $dados = $request->validated();
+    
+    Produto::create($dados);
+    
+    return redirect()->route('produtos.index')
+                     ->with('sucesso', 'Produto salvo com sucesso!');
+}`,
+        resources: {
+          videos: [
+            { title: "Laravel Form Requests explicados — Laravel Daily", url: "https://www.youtube.com/watch?v=F01q8t28qM8", duration: "12min" }
+          ],
+          docs: [
+            { title: "Laravel — Form Request Validation", url: "https://laravel.com/docs/11.x/validation#form-request-validation" }
+          ]
+        },
+        quiz: {
+          question: "No padrão de Form Requests do Laravel, o que acontece se a validação (rules) falhar ao enviar um formulário pelo navegador?",
+          options: [
+            { text: "A aplicação retorna uma tela de Erro 500 (Internal Server Error)", correct: false },
+            { text: "O código do Controller é executado, mas com os campos inválidos nulos", correct: false },
+            { text: "O Laravel redireciona automaticamente o usuário de volta à página anterior, injetando as mensagens de erro na sessão ($errors)", correct: true },
+            { text: "Um modal de erro em JavaScript aparece na tela", correct: false }
+          ],
+          explanation: "Esta é a magia do Laravel: se a validação do Form Request falhar, ele lança uma ValidationException que é interceptada pelo framework. O usuário é redirecionado de volta ao formulário automaticamente e a variável $errors fica disponível no Blade para exibir as mensagens."
+        }
       }
     ]
   },
@@ -1371,6 +2105,92 @@ public function destroy(Tarefa $tarefa) {
             { text: "->middleware('verified')", correct: false }
           ],
           explanation: "O middleware 'auth' verifica se há uma sessão de usuário ativa. Se o visitante não estiver logado, ele é automaticamente redirecionado para a tela de login."
+        }
+      },
+      {
+        id: "laravel-prg-csrf",
+        title: "3. Padrão PRG, CSRF e Transações DB",
+        level: "Master",
+        badge: "Arquitetura",
+        description: "Construa sistemas blindados contra ataques CSRF, duplicação de dados e inconsistências de banco de dados.",
+        content: `
+          <h4>1. Padrão PRG (Post/Redirect/Get)</h4>
+          <p>Você já preencheu um formulário, recarregou a página (F5) e o navegador perguntou "Deseja reenviar o formulário?"? Isso acontece quando o sistema não usa o padrão <strong>PRG</strong>.</p>
+          <p>Sempre que processar um <code>POST</code>, você <strong>nunca</strong> deve retornar uma View diretamente. Você deve fazer um <strong>Redirect</strong> para uma rota <code>GET</code>. O Laravel incentiva isso nativamente.</p>
+
+          <h4>2. CSRF (Cross-Site Request Forgery)</h4>
+          <p>É um ataque onde um site malicioso força o usuário (que está logado no seu sistema) a executar ações indesejadas (ex: apagar a conta). O Laravel protege formulários gerando um <strong>Token CSRF único</strong> na sessão.</p>
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Regra:</strong> Todo formulário POST, PUT ou DELETE no Laravel exige a diretiva <code>@csrf</code>, senão ele retorna Erro 419 (Page Expired).
+          </div>
+
+          <h4>3. Transações de Banco de Dados (DB Transactions)</h4>
+          <p>Quando uma ação precisa salvar em MÚLTIPLAS tabelas (ex: criar Pedido e atualizar Estoque), se o estoque falhar, o Pedido deve ser desfeito (Rollback) para evitar inconsistência. Transações garantem que as operações sejam <strong>Atômicas</strong> (Tudo funciona, ou nada funciona).</p>
+        `,
+        demoCode: `<!-- 1. Prevenção CSRF no Formulário (Blade) -->
+<form action="/pedidos" method="POST">
+    @csrf <!-- ESSENCIAL! Gera o token escondido -->
+    <button type="submit">Finalizar Compra</button>
+</form>
+
+<?php
+// 2. Controller com Padrão PRG e DB Transaction
+use Illuminate\\Support\\Facades\\DB;
+
+public function store(Request $request)
+{
+    // Validação
+    $dados = $request->validate([...]);
+
+    try {
+        // Inicia a Transação: NADA é salvo no banco permanentemente ainda
+        DB::beginTransaction();
+
+        // Operação 1: Criar Pedido
+        $pedido = Pedido::create($dados);
+
+        // Operação 2: Atualizar Estoque do Produto
+        $produto = Produto::find($dados['produto_id']);
+        if ($produto->estoque < 1) {
+            // Lança exceção para cancelar TUDO
+            throw new \\Exception('Produto sem estoque!'); 
+        }
+        $produto->decrement('estoque');
+
+        // Confirma todas as operações de uma vez!
+        DB::commit();
+
+        // 3. Padrão PRG (Redirect GET)
+        return redirect()->route('pedidos.show', $pedido->id)
+                         ->with('sucesso', 'Pedido criado!');
+
+    } catch (\\Exception $e) {
+        // Se QUALQUER coisa falhar, desfaz o pedido criado
+        DB::rollBack();
+
+        // Redireciona de volta com o erro
+        return back()->with('erro', $e->getMessage());
+    }
+}`,
+        resources: {
+          videos: [
+            { title: "Ataque CSRF Explicado e como o Laravel previne", url: "https://www.youtube.com/watch?v=n5WJOFz4Npw", duration: "10min" },
+            { title: "Database Transactions em Laravel — Povilas Korop", url: "https://www.youtube.com/watch?v=BqB37uT7xM0", duration: "12min" }
+          ],
+          docs: [
+            { title: "Laravel — CSRF Protection", url: "https://laravel.com/docs/11.x/csrf" },
+            { title: "Laravel — Database Transactions", url: "https://laravel.com/docs/11.x/database#database-transactions" }
+          ]
+        },
+        quiz: {
+          question: "Qual mecanismo o Laravel usa para garantir que operações em múltiplas tabelas (ex: transferir dinheiro de uma conta A para a conta B) funcionem perfeitamente em conjunto ou falhem em conjunto sem alterar o banco?",
+          options: [
+            { text: "Padrão PRG (Post/Redirect/Get)", correct: false },
+            { text: "Tokens CSRF na sessão", correct: false },
+            { text: "DB Transactions (beginTransaction, commit, rollBack)", correct: true },
+            { text: "Middlewares de validação customizados", correct: false }
+          ],
+          explanation: "DB Transactions garantem a propriedade de Atomicidade no banco de dados. DB::beginTransaction() inicia a transação. Se todas as ações ocorrerem com sucesso, DB::commit() as salva definitivamente. Se houver falha, DB::rollBack() desfaz as ações anteriores não confirmadas."
         }
       }
     ]

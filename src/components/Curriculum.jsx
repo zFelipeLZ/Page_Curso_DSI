@@ -1,18 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getStageById } from '../data/lessonsData';
 import { 
   Award, ArrowLeft, ArrowRight, CheckCircle2, Play,
-  BookOpen, X, Video, FileText, ExternalLink, Star
+  BookOpen, X, Video, FileText, ExternalLink, Star,
+  Clock, Eye, Lock, AlertTriangle, Info, Zap
 } from 'lucide-react';
 import Cheatsheet from './Cheatsheet';
 
+// ── Material Card (Novo formato premium sem iframe problemático) ──────────────
+function MaterialCard({ videoUrl, videoTitle }) {
+  return (
+    <a href={videoUrl} target="_blank" rel="noopener noreferrer"
+      className="flex items-center gap-4 p-4 bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl hover:border-red-500/40 hover:bg-slate-800/80 transition-all group shadow-xl">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/10 border border-red-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-inner">
+        <Play className="w-5 h-5 text-red-500 fill-red-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors truncate">{videoTitle}</p>
+        <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1 font-medium">
+          <ExternalLink className="w-3 h-3" /> Abre em nova aba garantida
+        </p>
+      </div>
+    </a>
+  );
+}
+
 // ── Quiz Panel ────────────────────────────────────────────────────────────────
-function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeIdx, setActiveIdx, lessonsLength, videosAllWatched }) {
+function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeIdx, setActiveIdx, lessonsLength }) {
   const [selectedOpt, setSelectedOpt] = useState(null);
   const [quizStatus, setQuizStatus] = useState(null);
 
   const handleSelectOption = (idx) => {
-    if (isLessonCompleted || !videosAllWatched) return;
+    if (isLessonCompleted) return; // Se já concluiu, não altera resposta
     setSelectedOpt(idx);
     setQuizStatus(null);
   };
@@ -29,67 +48,78 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
   };
 
   return (
-    <div className={`bg-slate-900/60 border rounded-2xl p-6 mt-8 space-y-4 transition-all ${videosAllWatched ? 'border-slate-800' : 'border-rose-500/30 opacity-75'}`}>
+    <div className="border rounded-2xl p-6 mt-8 space-y-4 transition-all bg-slate-900/60 border-slate-800">
       <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
         <div className="flex items-center gap-2 text-slate-300">
           <Award className="w-5 h-5 text-indigo-400" />
-          <h5 className="font-extrabold text-sm tracking-tight">Verifique seu Aprendizado</h5>
+          <h5 className="font-extrabold text-sm tracking-tight">Verificação de Aprendizado</h5>
         </div>
-        {!videosAllWatched && (
-          <span className="text-[10px] font-bold px-2 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-md">
-            🔒 Assista aos vídeos primeiro
+        {isLessonCompleted && (
+          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md">
+            <CheckCircle2 className="w-3 h-3" /> Lição Concluída!
           </span>
         )}
       </div>
 
-      <p className="text-slate-300 text-sm font-medium leading-relaxed">
-        {activeLesson.quiz.question}
-      </p>
+      {/* Question */}
+      <div className="bg-slate-950/60 border border-slate-800/60 rounded-xl p-4">
+        <p className="text-slate-200 text-sm font-semibold leading-relaxed">
+          <span className="text-indigo-400 font-black mr-2">❓</span>
+          {activeLesson.quiz.question}
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 gap-3 mt-3">
+      {/* Options */}
+      <div className="grid grid-cols-1 gap-2.5 mt-3">
         {activeLesson.quiz.options.map((opt, idx) => {
           const selected = selectedOpt === idx;
           const isCorrectOpt = quizStatus === 'correct' && opt.correct;
           const isIncorrectOpt = quizStatus === 'incorrect' && selected && !opt.correct;
 
-          let styleClasses = 'bg-slate-950/40 border-slate-800 hover:border-slate-700/60 text-slate-300';
-          if (selected) styleClasses = 'bg-blue-600/10 border-blue-500 text-blue-300';
+          let styleClasses = 'bg-slate-950/40 border-slate-800 hover:border-indigo-500/40 text-slate-300';
+          if (selected) styleClasses = 'bg-indigo-600/10 border-indigo-500 text-indigo-200';
           if (isCorrectOpt || (isLessonCompleted && opt.correct)) {
             styleClasses = 'bg-emerald-500/10 border-emerald-500 text-emerald-300';
           } else if (isIncorrectOpt) {
             styleClasses = 'bg-red-500/10 border-red-500 text-red-300';
           }
 
+          const letters = ['A', 'B', 'C', 'D'];
+
           return (
             <button
               key={idx}
               onClick={() => handleSelectOption(idx)}
-              disabled={!videosAllWatched}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl border text-left text-xs font-semibold transition-all duration-200 ${
-                !videosAllWatched ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+              disabled={isLessonCompleted}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-xs font-semibold transition-all duration-200 ${
+                isLessonCompleted ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:border-indigo-500/40'
               } ${styleClasses}`}
             >
-              <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${selected ? 'border-blue-500' : 'border-slate-800'}`}>
-                {selected && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+              <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 font-bold text-[10px] ${selected ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300' : 'border-slate-700 text-slate-500'}`}>
+                {letters[idx]}
               </div>
               <span>{opt.text}</span>
+              {isCorrectOpt && <CheckCircle2 className="w-4 h-4 text-emerald-400 ml-auto shrink-0" />}
             </button>
           );
         })}
       </div>
 
       {quizStatus === 'correct' && (
-        <div className="bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r-xl p-4 text-xs font-semibold text-emerald-400 animate-fade-in leading-relaxed">
-          <strong>Parabéns!</strong> {activeLesson.quiz.explanation}
+        <div className="bg-emerald-500/10 border border-emerald-500/30 border-l-4 border-l-emerald-500 rounded-xl p-4 space-y-1 animate-pulse-once">
+          <p className="text-xs font-black text-emerald-400 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Resposta Correta!</p>
+          <p className="text-xs text-emerald-300/80 leading-relaxed">{activeLesson.quiz.explanation}</p>
         </div>
       )}
       {quizStatus === 'incorrect' && (
-        <div className="bg-red-500/10 border-l-4 border-red-500 rounded-r-xl p-4 text-xs font-semibold text-red-400 animate-fade-in leading-relaxed">
-          <strong>Incorreto!</strong> Releia o conteúdo e tente novamente.
+        <div className="bg-red-500/10 border border-red-500/30 border-l-4 border-l-red-500 rounded-xl p-4 space-y-1">
+          <p className="text-xs font-black text-red-400 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Resposta Incorreta!</p>
+          <p className="text-xs text-red-300/80 leading-relaxed">Não desanime! Releia o conteúdo acima com atenção e tente novamente.</p>
         </div>
       )}
 
-      <div className="flex flex-wrap gap-4 items-center justify-between border-t border-slate-800/80 pt-4 mt-6">
+      {/* Navigation buttons */}
+      <div className="flex flex-wrap gap-3 items-center justify-between border-t border-slate-800/80 pt-4 mt-4">
         <button
           onClick={() => setActiveIdx(prev => Math.max(0, prev - 1))}
           disabled={activeIdx === 0}
@@ -101,19 +131,21 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
         {!isLessonCompleted && (
           <button
             onClick={handleCheckAnswer}
-            disabled={!videosAllWatched}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-white text-xs font-bold transition-colors ${
-              videosAllWatched ? 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer' : 'bg-slate-700 opacity-50 cursor-not-allowed'
+            disabled={selectedOpt === null}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-bold transition-all ${
+              selectedOpt !== null
+                ? 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer shadow-lg shadow-indigo-500/20'
+                : 'bg-slate-700 opacity-50 cursor-not-allowed'
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" /> Validar Resposta
+            <CheckCircle2 className="w-3.5 h-3.5" /> Confirmar Resposta
           </button>
         )}
 
         {isLessonCompleted && activeIdx < lessonsLength - 1 && (
           <button
             onClick={() => setActiveIdx(prev => Math.min(lessonsLength - 1, prev + 1))}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
           >
             Próxima Lição <ArrowRight className="w-3.5 h-3.5" />
           </button>
@@ -123,108 +155,48 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
   );
 }
 
-function extractYouTubeId(url) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&]{11})/);
-  return match ? match[1] : null;
-}
-
 // ── Materials Panel ───────────────────────────────────────────────────────────
-function MaterialsPanel({ resources, watchedVideos, onWatchVideo }) {
+function MaterialsPanel({ resources }) {
   if (!resources) return null;
   const { videos = [], docs = [] } = resources;
   if (videos.length === 0 && docs.length === 0) return null;
 
-  const allVideosWatched = videos.every(v => watchedVideos.includes(v.url));
-
   return (
-    <div className="mt-8 border border-indigo-500/20 bg-indigo-500/5 rounded-2xl p-6 space-y-5">
+    <div className="mt-8 border border-indigo-500/20 bg-indigo-500/5 rounded-2xl p-6 space-y-6">
       <div className="flex items-center gap-2 border-b border-indigo-500/20 pb-3">
         <BookOpen className="w-5 h-5 text-indigo-400" />
-        <h5 className="font-extrabold text-sm text-slate-200 tracking-tight">Materiais de Apoio</h5>
-        <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider ml-auto">Para aprofundar</span>
+        <h5 className="font-extrabold text-sm text-slate-200 tracking-tight">Materiais de Estudo</h5>
+        <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 ml-auto flex items-center gap-1">
+          <Info className="w-3 h-3" /> Consulte antes do Quiz
+        </span>
       </div>
 
       {videos.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-              <Video className="w-3.5 h-3.5 text-red-500" /> Vídeos Obrigatórios
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Video className="w-3.5 h-3.5 text-red-500" />
+            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">
+              Vídeo-Aulas Recomendadas
             </p>
-            {allVideosWatched && (
-              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                Todos assistidos ✓
-              </span>
-            )}
           </div>
           <div className="space-y-4">
-            {videos.map((v, i) => {
-              const ytId = extractYouTubeId(v.url);
-              const isWatched = watchedVideos.includes(v.url);
-
-              return (
-                <div key={i} className={`bg-slate-900 border rounded-xl overflow-hidden transition-all ${isWatched ? 'border-emerald-500/30' : 'border-slate-800 hover:border-red-500/30'}`}>
-                  {ytId ? (
-                    <div className="aspect-video w-full bg-black">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${ytId}?rel=0`}
-                        title={v.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  ) : (
-                    <a
-                      href={v.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between gap-3 p-4 group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                          <Play className="w-3.5 h-3.5 text-red-400 fill-red-400" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors truncate">{v.title}</p>
-                          {v.duration && <p className="text-[10px] text-slate-600">{v.duration}</p>}
-                        </div>
-                      </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-red-400 shrink-0 transition-colors" />
-                    </a>
-                  )}
-                  
-                  <div className="bg-slate-950 p-3 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-400 truncate pr-4">{v.title}</span>
-                    <button
-                      onClick={() => onWatchVideo(v.url)}
-                      disabled={isWatched}
-                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase transition-colors ${
-                        isWatched 
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 cursor-pointer'
-                      }`}
-                    >
-                      {isWatched ? (
-                        <><CheckCircle2 className="w-3.5 h-3.5" /> Assistido</>
-                      ) : (
-                        'Marcar como Assistido'
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {videos.map((v, i) => (
+              <MaterialCard
+                key={i}
+                videoUrl={v.url}
+                videoTitle={v.title}
+              />
+            ))}
           </div>
         </div>
       )}
 
       {docs.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-blue-400" /> Documentação Oficial
-          </p>
+          <div className="flex items-center gap-2">
+            <FileText className="w-3.5 h-3.5 text-blue-400" />
+            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">Documentação Oficial</p>
+          </div>
           <div className="space-y-2">
             {docs.map((d, i) => (
               <a
@@ -232,7 +204,7 @@ function MaterialsPanel({ resources, watchedVideos, onWatchVideo }) {
                 href={d.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between gap-3 p-3 bg-slate-900/70 hover:bg-slate-800/80 border border-slate-800 hover:border-blue-500/30 rounded-xl transition-all duration-200 group"
+                className="flex items-center justify-between gap-3 p-3 bg-slate-900/70 hover:bg-slate-800/80 border border-slate-800 hover:border-blue-500/30 rounded-xl transition-all group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
@@ -250,177 +222,96 @@ function MaterialsPanel({ resources, watchedVideos, onWatchVideo }) {
   );
 }
 
-// ── Main Curriculum Component ─────────────────────────────────────────────────
-export default function Curriculum({ stageKey, completedLessons, onCompleteLesson, onSwitchView }) {
+// ── Progress Bar Header ───────────────────────────────────────────────────────
+function LessonProgressBar({ current, total, accent }) {
+  const pct = Math.round(((current + 1) / total) * 100);
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-[10px] font-bold text-slate-500">
+        <span>Lição {current + 1} de {total}</span>
+        <span>{pct}% desta etapa</span>
+      </div>
+      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${pct}%`, backgroundColor: accent }}
+        />
+        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: accent }} />
+      </div>
+    </div>
+  );
+}
+
+export default function Curriculum({ 
+  stageKey, 
+  onSwitchView, 
+  completedLessons,
+  onCompleteLesson
+}) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [showCheatsheet, setShowCheatsheet] = useState(false);
-  const [watchedVideos, setWatchedVideos] = useState([]);
 
-  const handleWatchVideo = (url) => {
-    if (!watchedVideos.includes(url)) {
-      setWatchedVideos(prev => [...prev, url]);
-    }
-  };
+  const stage = getStageById(stageKey || 'stage-html');
+  
+  // Safely reset activeIdx when stageKey changes to avoid out-of-bounds array access
+  useEffect(() => {
+    setActiveIdx(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [stageKey]);
 
-  const stage = getStageById(stageKey);
-
-  if (!stage) {
-    return (
-      <div className="text-center py-20 space-y-4">
-        <p className="text-slate-400">Etapa não encontrada.</p>
-        <button onClick={() => onSwitchView('dashboard')} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm">
-          Voltar ao Início
-        </button>
-      </div>
-    );
-  }
+  if (!stage) return null;
 
   const lessons = stage.lessons;
-  const activeLesson = lessons[activeIdx];
-  const isLessonCompleted = completedLessons.includes(activeLesson?.id);
+  const safeIdx = activeIdx >= lessons.length ? 0 : activeIdx;
+  const activeLesson = lessons[safeIdx];
+  const isLessonCompleted = activeLesson ? completedLessons.includes(activeLesson.id) : false;
+  const completedCount = lessons.filter(l => completedLessons.includes(l.id)).length;
 
-  if (!activeLesson) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-slate-400">Nenhuma lição encontrada nesta etapa.</p>
-        <button onClick={() => onSwitchView('dashboard')} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl">Voltar</button>
-      </div>
-    );
-  }
-
-  const lessonVideos = activeLesson.resources?.videos || [];
-  const videosAllWatched = lessonVideos.length === 0 || lessonVideos.every(v => watchedVideos.includes(v.url));
+  if (!activeLesson) return null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 animate-fade-in">
-      
-      {/* ── Left Sidebar ── */}
-      <aside className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 h-fit lg:max-h-[calc(100vh-180px)] overflow-y-auto lg:sticky lg:top-24 space-y-5">
-        
-        {/* Stage header */}
-        <div className="space-y-1 border-b border-slate-800/80 pb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Etapa {stage.stageNumber}</span>
-            {stage.optional && (
-              <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase">
-                <Star className="w-2.5 h-2.5" /> Opcional
-              </span>
-            )}
-          </div>
+      <aside className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 h-fit lg:sticky lg:top-24 space-y-5">
+        <div className="space-y-3 border-b border-slate-800/80 pb-4">
           <h4 className="text-sm font-extrabold text-slate-200">{stage.title}</h4>
-          <p className="text-[10px] text-slate-500">{lessons.filter(l => completedLessons.includes(l.id)).length}/{lessons.length} lições concluídas</p>
+          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${(completedCount / lessons.length) * 100}%`, backgroundColor: stage.accent }} />
+          </div>
         </div>
-
-        {/* Lessons list */}
         <ul className="space-y-1.5">
-          {lessons.map((lesson, idx) => {
-            const completed = completedLessons.includes(lesson.id);
-            const active = idx === activeIdx;
-            return (
-              <li key={lesson.id}>
-                <button
-                  onClick={() => setActiveIdx(idx)}
-                  className={`w-full flex items-center justify-between text-left p-3 rounded-xl text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-                    active
-                      ? 'bg-slate-800/80 border-slate-700/80 text-slate-200'
-                      : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-800/30 hover:text-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 ${
-                      completed ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-500'
-                    }`}>
-                      {completed ? '✓' : idx + 1}
-                    </span>
-                    <span className="truncate">{lesson.title.split('.').slice(1).join('.').trim() || lesson.title}</span>
-                  </div>
-                  {completed && (
-                    <span className="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full shrink-0">OK</span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
+          {lessons.map((lesson, idx) => (
+            <li key={lesson.id}>
+              <button onClick={() => setActiveIdx(idx)} className={`w-full text-left p-3 rounded-xl text-xs font-semibold ${idx === activeIdx ? 'bg-slate-800/80' : ''}`}>
+                {lesson.title}
+              </button>
+            </li>
+          ))}
         </ul>
-
-        {/* Cheatsheet button */}
-        <div className="pt-2 border-t border-slate-800/80">
-          <button
-            onClick={() => setShowCheatsheet(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 font-bold rounded-xl border border-indigo-500/30 transition-all text-xs tracking-wide uppercase"
-          >
-            <BookOpen className="w-4 h-4" />
-            Material de Consulta
-          </button>
-        </div>
-
-        {/* Back button */}
-        <button
-          onClick={() => onSwitchView('dashboard')}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-slate-500 hover:text-slate-300 font-semibold rounded-xl text-xs transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Voltar à Jornada
+        <button onClick={() => setShowCheatsheet(true)} className="w-full py-3 bg-indigo-600/10 text-indigo-400 font-bold rounded-xl border border-indigo-500/30 text-xs">
+          Material de Consulta
         </button>
       </aside>
 
-      {/* ── Main Content ── */}
-      <article className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col shadow-xl shadow-black/10">
+      <article className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
         <div className="space-y-6">
+          <LessonProgressBar current={activeIdx} total={lessons.length} accent={stage.accent} />
+          <h3 className="text-xl font-black text-slate-200">{activeLesson.title}</h3>
+          <div className="prose prose-invert max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: activeLesson.content }} />
           
-          {/* Lesson Header */}
-          <div className="border-b border-slate-800 pb-5 space-y-2">
-            <span
-              className="inline-block text-[9px] font-extrabold border uppercase px-2 py-0.5 rounded-full tracking-wider"
-              style={{ color: stage.accent, borderColor: stage.accent + '80' }}
-            >
-              {activeLesson.level} — {activeLesson.badge}
-            </span>
-            <h3 className="text-xl md:text-2xl font-black text-slate-200">{activeLesson.title}</h3>
-            {activeLesson.description && (
-              <p className="text-sm text-slate-400 leading-relaxed">{activeLesson.description}</p>
-            )}
-          </div>
-
-          {/* Content Body */}
-          <div
-            className="prose prose-invert max-w-none text-slate-300 text-sm md:text-base leading-relaxed space-y-4"
-            dangerouslySetInnerHTML={{ __html: activeLesson.content }}
-          />
-
-          {/* Code Example */}
-          {activeLesson.demoCode && (
-            <div className="border border-slate-800 rounded-xl overflow-hidden shadow-lg bg-slate-950 font-mono text-xs md:text-sm my-6">
-              <div className="bg-slate-900 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between text-slate-400 select-none">
-                <span className="font-bold flex items-center gap-1.5">
-                  <Play className="w-3.5 h-3.5 text-blue-500 fill-blue-500" />
-                  Código de Exemplo
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-600">{stage.tech}</span>
-              </div>
-              <pre className="p-4 overflow-x-auto text-slate-300 leading-relaxed">
-                <code>{activeLesson.demoCode}</code>
-              </pre>
-            </div>
+          {activeLesson.challenge && (
+            <div className="border border-violet-500/30 bg-violet-500/5 rounded-xl p-5" dangerouslySetInnerHTML={{ __html: activeLesson.challenge }} />
           )}
 
-          {/* Materials Panel */}
-          <MaterialsPanel 
-            resources={activeLesson.resources} 
-            watchedVideos={watchedVideos}
-            onWatchVideo={handleWatchVideo}
-          />
+          <MaterialsPanel resources={activeLesson.resources} />
         </div>
 
-        {/* Quiz */}
-        <QuizPanel
-          key={activeLesson.id}
+        <QuizPanel 
           activeLesson={activeLesson}
           isLessonCompleted={isLessonCompleted}
-          onCompleteLesson={onCompleteLesson}
+          onCompleteLesson={() => onCompleteLesson(activeLesson.id)}
           activeIdx={activeIdx}
           setActiveIdx={setActiveIdx}
           lessonsLength={lessons.length}
-          videosAllWatched={videosAllWatched}
         />
       </article>
 

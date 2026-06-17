@@ -37,16 +37,53 @@ export default function Sidebar({
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
 
-        {/* ── Logo ── */}
-        <div className="px-5 py-5 border-b border-slate-800/80 flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20 shrink-0">
-            <GraduationCap className="w-5 h-5 text-white" />
+        {/* ── Logo & Progress ── */}
+        <div className="px-5 py-6 border-b border-slate-800/80 shrink-0 relative overflow-hidden">
+          {/* Decorative background glow */}
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex items-center gap-3 relative z-10 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20 shrink-0 preserve-color">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-black text-base text-slate-100 leading-tight flex items-center gap-1">
+                WebDev Pro <Sparkles className="w-3 h-3 text-rose-400 shrink-0" />
+              </h2>
+              <span className="text-[10px] font-semibold text-slate-500 tracking-widest uppercase">FullStack Academy</span>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h2 className="font-black text-base text-slate-100 leading-tight flex items-center gap-1">
-              Web Dev Lab <Sparkles className="w-3 h-3 text-rose-400 shrink-0" />
-            </h2>
-            <span className="text-[10px] font-semibold text-slate-500 tracking-widest uppercase">Do HTML ao Laravel</span>
+
+          {/* Global Progress Indicator */}
+          <div className="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80 flex items-center gap-3">
+            {/* SVG Circle */}
+            <div className="relative w-10 h-10 shrink-0">
+              <svg className="w-full h-full -rotate-90 preserve-color" viewBox="0 0 36 36">
+                <path
+                  className="text-slate-800"
+                  strokeWidth="3"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  className="text-rose-500"
+                  strokeWidth="3"
+                  strokeDasharray={`${globalProgress}, 100`}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-slate-200">{globalProgress}%</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-300">Progresso Geral</p>
+              <p className="text-[10px] text-slate-500">Continue avançando!</p>
+            </div>
           </div>
         </div>
 

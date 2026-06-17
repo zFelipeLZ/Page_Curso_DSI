@@ -7,9 +7,11 @@ import Playground from './components/Playground';
 import PHPSimulator from './components/PHPSimulator';
 import DatabaseSimulator from './components/DatabaseSimulator';
 import Cheatsheet from './components/Cheatsheet';
+import LoginPanel from './components/LoginPanel';
+import { supabase } from './lib/supabase';
 import { fireConfetti } from './utils/confetti';
 import { STAGES, REQUIRED_LESSON_IDS } from './data/lessonsData';
-import { Award, Printer, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Award, Printer, X, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -17,16 +19,38 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
+  // Auth State
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
   // Certificate
   const [studentName, setStudentName] = useState('');
   const [showCertModal, setShowCertModal] = useState(false);
 
+  // Theme & Onboarding
+  const [isLightMode, setIsLightMode] = useState(() => {
+    return localStorage.getItem('webdev_pro_theme') === 'light';
+  });
+  
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return !localStorage.getItem('webdev_pro_welcomed');
+  });
+
   // Progress — stored as array of completed lesson IDs
   const [completedLessons, setCompletedLessons] = useState(() => {
     try {
-      const saved = localStorage.getItem('web_dev_lab_v2_progress');
-      if (saved) {
-        const parsed = JSON.parse(saved);
+      // Migrate from old key if exists
+      const oldSaved = localStorage.getItem('web_dev_lab_v2_progress');
+      const newSaved = localStorage.getItem('webdev_pro_progress');
+      
+      let savedToUse = newSaved;
+      if (!newSaved && oldSaved) {
+        savedToUse = oldSaved;
+        localStorage.setItem('webdev_pro_progress', oldSaved);
+      }
+
+      if (savedToUse) {
+        const parsed = JSON.parse(savedToUse);
         if (Array.isArray(parsed)) return parsed;
       }
       return [];
@@ -35,13 +59,22 @@ export default function App() {
     }
   });
 
-  // Persist progress
+  // Persist local progress and theme
   useEffect(() => {
-    localStorage.setItem('web_dev_lab_v2_progress', JSON.stringify(completedLessons));
+    localStorage.setItem('webdev_pro_progress', JSON.stringify(completedLessons));
   }, [completedLessons]);
 
   useEffect(() => {
-    document.body.className = 'bg-slate-950 text-slate-100 min-h-screen selection:bg-blue-600/30';
+    localStorage.setItem('webdev_pro_theme', isLightMode ? 'light' : 'dark');
+    if (isLightMode) {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [isLightMode]);
+
+  useEffect(() => {
+    document.body.className = 'bg-slate-950 text-slate-100 min-h-screen selection:bg-rose-500/30';
   }, []);
 
   useEffect(() => {
@@ -50,6 +83,80 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [toast]);
+
+  // ── Auth & Cloud Sync ──
+  useEffect(() => {
+    // Busca a sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        handleUserLogin(session.user);
+      } else {
+        setLoadingAuth(false);
+      }
+    });
+
+    // Escuta mudanças (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        handleUserLogin(session.user);
+      } else {
+        setLoadingAuth(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleUserLogin = async (currentUser) => {
+    try {
+      // Busca progresso da nuvem
+      const { data, error } = await supabase
+        .from('user_progress')
+        .select('completed_lessons')
+        .eq('user_id', currentUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar progresso:', error);
+      }
+
+      let cloudLessons = data?.completed_lessons || [];
+      
+      // Auto-Migration: Mescla o local (localStorage) com o da nuvem
+      // Set remove duplicatas
+      const merged = Array.from(new Set([...completedLessons, ...cloudLessons]));
+
+      // Se o local tiver algo a mais que a nuvem, já faz um UPSERT
+      if (merged.length > cloudLessons.length || !data) {
+        await supabase
+          .from('user_progress')
+          .upsert({ 
+            user_id: currentUser.id, 
+            completed_lessons: merged 
+          });
+      }
+
+      setCompletedLessons(merged);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingAuth(false);
+    }
+  };
+
+  const syncProgressToCloud = async (lessonId) => {
+    if (!user) return;
+    const next = Array.from(new Set([...completedLessons, lessonId]));
+    try {
+      await supabase
+        .from('user_progress')
+        .upsert({ user_id: user.id, completed_lessons: next });
+    } catch (e) {
+      console.error('Erro ao sincronizar', e);
+    }
+  };
 
   // ── Progress calculations ──
   const totalRequired = REQUIRED_LESSON_IDS.length;
@@ -68,6 +175,7 @@ export default function App() {
     if (!completedLessons.includes(lessonId)) {
       const next = [...completedLessons, lessonId];
       setCompletedLessons(next);
+      syncProgressToCloud(lessonId); // Sincroniza em background
 
       setTimeout(() => fireConfetti(), 300);
       setToast({ message: '✅ Lição concluída! Continue avançando na jornada.', type: 'success' });
@@ -91,12 +199,34 @@ export default function App() {
 
   const handleSwitchView = (view) => setActiveView(view);
 
+  const handleLogout = async () => {
+    setCompletedLessons([]);
+    setUser(null);
+    await supabase.auth.signOut();
+  };
+
   const handleResetProgress = () => {
     if (window.confirm('Tem certeza que deseja resetar todo o progresso? Esta ação não pode ser desfeita.')) {
       setCompletedLessons([]);
+      if (user) {
+        supabase.from('user_progress').upsert({ user_id: user.id, completed_lessons: [] }).then();
+      }
       setToast({ message: 'Progresso resetado com sucesso.', type: 'info' });
     }
   };
+
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 text-rose-500 animate-spin mb-4" />
+        <p className="text-slate-400 font-medium">Conectando ao WebDev Pro...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPanel />;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -125,6 +255,7 @@ export default function App() {
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         completedLessons={completedLessons}
+        user={user}
       />
 
       {/* Main */}
@@ -133,6 +264,10 @@ export default function App() {
           activeView={activeView}
           currentStage={currentStage}
           setSidebarOpen={setSidebarOpen}
+          isLightMode={isLightMode}
+          setIsLightMode={setIsLightMode}
+          user={user}
+          onLogout={handleLogout}
         />
 
         <main className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto space-y-8">
@@ -164,6 +299,7 @@ export default function App() {
               onOpenStage={handleOpenStage}
               completedLessons={completedLessons}
               onSwitchView={handleSwitchView}
+              user={user}
             />
           )}
 
@@ -311,6 +447,54 @@ export default function App() {
                 Fechar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Welcome Onboarding Modal */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 md:p-8 shadow-2xl animate-slide-in relative overflow-hidden preserve-color">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-amber-500" />
+            
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center mb-6 shadow-lg shadow-rose-500/20">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            
+            <h2 className="text-2xl font-black text-white mb-3">Bem-vindo à WebDev Pro!</h2>
+            <p className="text-slate-300 leading-relaxed mb-6">
+              Esta é uma plataforma didática completa para você dominar o Desenvolvimento Web do zero ao FullStack.
+            </p>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <span className="text-blue-400 font-bold">1</span>
+                </div>
+                <p className="text-sm text-slate-400"><strong className="text-slate-200">Vídeos Obrigatórios:</strong> Para avançar, você precisará dar play e assistir a pelo menos 80% do tempo dos vídeos indicados.</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <span className="text-amber-400 font-bold">2</span>
+                </div>
+                <p className="text-sm text-slate-400"><strong className="text-slate-200">Prática em Tempo Real:</strong> Use os simuladores de HTML, PHP e Banco de Dados disponíveis no menu lateral.</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <span className="text-emerald-400 font-bold">3</span>
+                </div>
+                <p className="text-sm text-slate-400"><strong className="text-slate-200">Certificado Premium:</strong> Conclua 100% das etapas obrigatórias para emitir seu certificado.</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowWelcome(false);
+                localStorage.setItem('webdev_pro_welcomed', 'true');
+              }}
+              className="w-full py-3.5 rounded-xl bg-slate-100 text-slate-900 font-bold text-sm hover:bg-white transition-colors"
+            >
+              Começar minha jornada
+            </button>
           </div>
         </div>
       )}
