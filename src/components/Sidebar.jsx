@@ -1,7 +1,7 @@
 import { STAGES, isStageUnlocked } from '../data/lessonsData';
 import {
   LayoutDashboard, BookOpen, Award, Sparkles, GraduationCap,
-  Code2, Terminal, Database, ChevronRight, CheckCircle2
+  Code2, Terminal, Database, ChevronRight, CheckCircle2, ShieldCheck
 } from 'lucide-react';
 
 const TECH_COLORS = {
@@ -16,7 +16,7 @@ const TECH_COLORS = {
 export default function Sidebar({
   activeView, currentStage, onSwitchView, onOpenStage,
   globalProgress, sidebarOpen, setSidebarOpen,
-  completedLessons = []
+  completedLessons = [], user
 }) {
   const close = () => setSidebarOpen(false);
 
@@ -167,6 +167,7 @@ export default function Sidebar({
                 { view: 'php-simulator',icon: Terminal,   label: 'Simulador PHP',       color: 'text-violet-400' },
                 { view: 'db-simulator', icon: Database,   label: 'Simulador SQL',       color: 'text-cyan-400' },
                 { view: 'cheatsheet',   icon: BookOpen,   label: 'Guia de Consulta',    color: 'text-indigo-400' },
+                ...(user?.role === 'admin' ? [{ view: 'admin-dashboard', icon: ShieldCheck, label: 'Painel Admin', color: 'text-rose-500' }] : [])
               ].map(({ view, icon: Icon, label, color }) => (
                 <li key={view}>
                   <button

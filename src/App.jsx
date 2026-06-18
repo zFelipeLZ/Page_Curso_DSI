@@ -7,6 +7,7 @@ import Playground from './components/Playground';
 import PHPSimulator from './components/PHPSimulator';
 import DatabaseSimulator from './components/DatabaseSimulator';
 import Cheatsheet from './components/Cheatsheet';
+import AdminDashboard from './components/AdminDashboard';
 import LoginPanel from './components/LoginPanel';
 import { supabase } from './lib/supabase';
 import { fireConfetti } from './utils/confetti';
@@ -98,10 +99,10 @@ export default function App() {
 
     // Escuta mudanças (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
       if (session?.user) {
         handleUserLogin(session.user);
       } else {
+        setUser(null);
         setLoadingAuth(false);
       }
     });
@@ -111,6 +112,21 @@ export default function App() {
 
   const handleUserLogin = async (currentUser) => {
     try {
+      // Busca role do profile
+      let userRole = 'student';
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single();
+        
+      if (profileData) {
+        userRole = profileData.role;
+      }
+
+      // Atualiza estado do user com a role
+      setUser({ ...currentUser, role: userRole });
+
       // Busca progresso da nuvem
       const { data, error } = await supabase
         .from('user_progress')
@@ -268,6 +284,8 @@ export default function App() {
           setIsLightMode={setIsLightMode}
           user={user}
           onLogout={handleLogout}
+          onOpenStage={handleOpenStage}
+          onSwitchView={handleSwitchView}
         />
 
         <main className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto space-y-8">
@@ -317,6 +335,7 @@ export default function App() {
           {activeView === 'php-simulator' && <PHPSimulator />}
           {activeView === 'db-simulator' && <DatabaseSimulator />}
           {activeView === 'cheatsheet' && <Cheatsheet />}
+          {activeView === 'admin-dashboard' && <AdminDashboard user={user} />}
 
           {/* Footer */}
           <div className="border-t border-slate-900 pt-8 mt-12 flex flex-wrap gap-4 items-center justify-between text-xs text-slate-600 font-semibold select-none">
