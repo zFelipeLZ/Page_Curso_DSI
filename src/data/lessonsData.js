@@ -78,11 +78,7 @@ export const STAGES = [
                 }
               ]
             },
-            { 
-              title: "Aprenda HTML em 1 Hora — Filipe Deschamps", 
-              url: "https://www.youtube.com/watch?v=SV7TL0hxmIQ", 
-              duration: "58min" 
-            }
+            { title: "Aprenda HTML em 1 Hora — Filipe Deschamps", url: "https://www.youtube.com/watch?v=SV7TL0hxmIQ", duration: "58min" }
           ],
           docs: [
             { title: "MDN — Introdução ao HTML", url: "https://developer.mozilla.org/pt-BR/docs/Learn/HTML/Introduction_to_HTML" },
@@ -142,8 +138,8 @@ export const STAGES = [
 </footer>`,
         resources: {
           videos: [
-            { title: "HTML Semântico — Rafaella Ballerini", url: "https://www.youtube.com/watch?v=7LMl8tyqMiM", duration: "12min" },
-            { title: "Semantic HTML — Kevin Powell (EN)", url: "https://www.youtube.com/watch?v=kGW8Al_cga4", duration: "20min" }
+            { title: "HTML Semântico — Rafaella Ballerini", url: "https://www.youtube.com/watch?v=Fhy-5CtVkiM", duration: "12min" },
+            { title: "Semantic HTML — Kevin Powell (EN)", url: "https://www.youtube.com/watch?v=YOsMJQfwqow", duration: "20min" }
           ],
           docs: [
             { title: "MDN — HTML Semântico", url: "https://developer.mozilla.org/pt-BR/docs/Glossary/Semantics#sem%C3%A2ntica_em_html" },
@@ -198,7 +194,7 @@ export const STAGES = [
 </form>`,
         resources: {
           videos: [
-            { title: "Formulários HTML Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=wwqOJ2o84S4", duration: "35min" }
+            { title: "Formulários HTML Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=91u7wBqQBIo", duration: "35min" }
           ],
           docs: [
             { title: "MDN — Formulários Web", url: "https://developer.mozilla.org/pt-BR/docs/Learn/Forms" },
@@ -271,8 +267,8 @@ export const STAGES = [
 </div>`,
         resources: {
           videos: [
-            { title: "Acessibilidade Web para Iniciantes — ARIA explicado", url: "https://www.youtube.com/watch?v=0hqhAIjE_8I", duration: "18min" },
-            { title: "HTML Semântico e Acessibilidade — Código Fonte TV", url: "https://www.youtube.com/watch?v=7LMl8tyqMiM", duration: "12min" }
+            { title: "Acessibilidade Web para Iniciantes — ARIA explicado", url: "https://www.youtube.com/watch?v=g1ptrMrfrVc", duration: "18min" },
+            { title: "HTML Semântico e Acessibilidade — Código Fonte TV", url: "https://www.youtube.com/watch?v=4dQtz1PpY9A", duration: "12min" }
           ],
           docs: [
             { title: "MDN — ARIA: Funções, Estados e Propriedades", url: "https://developer.mozilla.org/pt-BR/docs/Web/Accessibility/ARIA" },
@@ -352,8 +348,8 @@ body {
 }`,
         resources: {
           videos: [
-            { title: "CSS do Zero — Curso em Vídeo", url: "https://www.youtube.com/watch?v=GPK8A-A156o", duration: "1h 15min" },
-            { title: "CSS para iniciantes — Filipe Deschamps", url: "https://www.youtube.com/watch?v=TKB3oMRLzgE", duration: "45min" }
+            { title: "CSS do Zero — Curso em Vídeo", url: "https://www.youtube.com/watch?v=Ejkb_YpuHWs", duration: "1h 15min" },
+            { title: "CSS para iniciantes — Filipe Deschamps", url: "https://www.youtube.com/watch?v=xx01-s_Q-mU", duration: "45min" }
           ],
           docs: [
             { title: "MDN — CSS Primeiros Passos", url: "https://developer.mozilla.org/pt-BR/docs/Learn/CSS/First_steps" },
@@ -409,8 +405,8 @@ body {
 }`,
         resources: {
           videos: [
-            { title: "Flexbox em 15 minutos — Kevin Powell (legendado)", url: "https://www.youtube.com/watch?v=hwbqquXww-U", duration: "15min" },
-            { title: "Flexbox Completo — Origamid", url: "https://www.youtube.com/watch?v=s3y9-KSKiO0", duration: "1h 20min" }
+            { title: "Flexbox em 15 minutos — Kevin Powell (legendado)", url: "https://www.youtube.com/watch?v=ObvHOlAsbKw", duration: "15min" },
+            { title: "Flexbox Completo — Origamid", url: "https://www.youtube.com/watch?v=x-4z_u8LcGc", duration: "1h 20min" }
           ],
           docs: [
             { title: "Guia Completo de Flexbox — CSS-Tricks", url: "https://css-tricks.com/snippets/css/a-guide-to-flexbox/" },
@@ -470,7 +466,7 @@ body {
 }`,
         resources: {
           videos: [
-            { title: "Responsividade do Zero — Hora de Codar", url: "https://www.youtube.com/watch?v=H91DhKPjhPk", duration: "40min" }
+            { title: "Responsividade do Zero — Hora de Codar", url: "https://www.youtube.com/watch?v=Z14bK5yEzY8", duration: "40min" }
           ],
           docs: [
             { title: "MDN — Design Responsivo", url: "https://developer.mozilla.org/pt-BR/docs/Learn/CSS/CSS_layout/Responsive_Design" },
@@ -573,7 +569,7 @@ body {
         resources: {
           videos: [
             { title: "CSS Grid em 20 minutos — Traversy Media (legendado)", url: "https://www.youtube.com/watch?v=0xMQfnTU6oo", duration: "20min" },
-            { title: "CSS Grid completo — Origamid", url: "https://www.youtube.com/watch?v=HB1ZnMrIqA4", duration: "1h 10min" }
+            { title: "CSS Grid completo — Origamid", url: "https://www.youtube.com/watch?v=x-4z_u8LcGc", duration: "1h 10min" }
           ],
           docs: [
             { title: "CSS Grid Garden — Jogo Interativo de Grid", url: "https://cssgridgarden.com/#pt-br" },
@@ -673,7 +669,7 @@ linguagens.forEach(lang => {
 });`,
         resources: {
           videos: [
-            { title: "JavaScript para Iniciantes — Filipe Deschamps", url: "https://www.youtube.com/watch?v=DiM-Kpuz7GU", duration: "55min" },
+            { title: "JavaScript para Iniciantes — Filipe Deschamps", url: "https://www.youtube.com/watch?v=QVrrqgDhhu4", duration: "55min" },
             { title: "Curso JavaScript Moderno — Hora de Codar", url: "https://www.youtube.com/watch?v=TkD0QMyBa28", duration: "2h" }
           ],
           docs: [
@@ -726,7 +722,7 @@ btn.addEventListener('click', () => {
 });`,
         resources: {
           videos: [
-            { title: "Manipulação do DOM — Programação Web (EN)", url: "https://www.youtube.com/watch?v=y17RuWkWdn8", duration: "25min" },
+            { title: "Manipulação do DOM — Programação Web (EN)", url: "https://www.youtube.com/watch?v=2JVJAaVZnqc", duration: "25min" },
             { title: "DOM Completo — Curso em Vídeo", url: "https://www.youtube.com/watch?v=WWZX8RWLxIk", duration: "1h 30min" }
           ],
           docs: [
@@ -833,8 +829,8 @@ document.getElementById('btn-buscar').addEventListener('click', async () => {
 });`,
         resources: {
           videos: [
-            { title: "Fetch API e Async/Await — Traversy Media (legendado)", url: "https://www.youtube.com/watch?v=cuEtnrL9-H0", duration: "30min" },
-            { title: "JavaScript Assíncrono completo — Rocketseat", url: "https://www.youtube.com/watch?v=xyNDP_wFDFk", duration: "45min" }
+            { title: "Fetch API e Async/Await — Traversy Media (legendado)", url: "https://www.youtube.com/watch?v=q28lfkBd9F4", duration: "30min" },
+            { title: "JavaScript Assíncrono completo — Rocketseat", url: "https://www.youtube.com/watch?v=-pQ2d0z-8r4", duration: "45min" }
           ],
           docs: [
             { title: "MDN — Como usar Promises", url: "https://developer.mozilla.org/pt-BR/docs/Learn/JavaScript/Asynchronous/Promises" },
@@ -908,8 +904,8 @@ echo "</ul>";
 ?>`,
         resources: {
           videos: [
-            { title: "PHP para Iniciantes — Traversy Media (EN)", url: "https://www.youtube.com/watch?v=BUCiSSyIGGU", duration: "1h 10min" },
-            { title: "Curso PHP Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=F7KzJ7e6EAc", duration: "3h" }
+            { title: "PHP para Iniciantes — Traversy Media (EN)", url: "https://www.youtube.com/watch?v=oJbfyzaA2QA", duration: "1h 10min" },
+            { title: "Curso PHP Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=6qafpEI8lcU", duration: "3h" }
           ],
           docs: [
             { title: "PHP Manual Oficial", url: "https://www.php.net/manual/pt_BR/" },
@@ -963,7 +959,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>`,
         resources: {
           videos: [
-            { title: "Formulários com PHP — Curso em Vídeo", url: "https://www.youtube.com/watch?v=RIiNixHCB4Y", duration: "40min" }
+            { title: "Formulários com PHP — Curso em Vídeo", url: "https://www.youtube.com/watch?v=tZf2mIAXTLw", duration: "40min" }
           ],
           docs: [
             { title: "PHP — $_POST e $_GET", url: "https://www.php.net/manual/pt_BR/reserved.variables.post.php" },
@@ -1016,7 +1012,7 @@ echo "Usuário encontrado: " . $usuario['nome'];
 ?>`,
         resources: {
           videos: [
-            { title: "PDO e SQL Injection — Traversy Media (EN)", url: "https://www.youtube.com/watch?v=OEV8gMkCHXQ", duration: "35min" }
+            { title: "PDO e SQL Injection — Traversy Media (EN)", url: "https://www.youtube.com/watch?v=kEW6f7Pilc4", duration: "35min" }
           ],
           docs: [
             { title: "PHP Manual — PDO", url: "https://www.php.net/manual/pt_BR/book.pdo.php" },
@@ -1121,8 +1117,8 @@ try {
 ?>`,
         resources: {
           videos: [
-            { title: "PHP OO Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=txMiwMF0U3M", duration: "2h 30min" },
-            { title: "Orientação a Objetos em PHP — Laracasts (EN)", url: "https://www.youtube.com/watch?v=AnVGEGQnGq0", duration: "25min" }
+            { title: "PHP OO Completo — Hora de Codar", url: "https://www.youtube.com/watch?v=6qafpEI8lcU", duration: "2h 30min" },
+            { title: "Orientação a Objetos em PHP — Laracasts (EN)", url: "https://www.youtube.com/watch?v=hzy_P_H-1CQ", duration: "25min" }
           ],
           docs: [
             { title: "PHP Manual — Classes e Objetos", url: "https://www.php.net/manual/pt_BR/language.oop5.php" },
@@ -1236,7 +1232,7 @@ WHERE id = 1;
 DELETE FROM usuarios WHERE id = 1;`,
         resources: {
           videos: [
-            { title: "MySQL: INSERT, UPDATE e DELETE", url: "https://www.youtube.com/watch?v=5rKte0Yp-YQ", duration: "45min" }
+            { title: "MySQL: INSERT, UPDATE e DELETE", url: "https://www.youtube.com/watch?v=wXViczeTr6Q", duration: "45min" }
           ],
           docs: [
             { title: "MySQL - Data Manipulation", url: "https://dev.mysql.com/doc/refman/8.0/en/data-manipulation.html" }
@@ -1319,8 +1315,8 @@ CREATE TABLE pedidos (
 UPDATE clientes SET email = 'novo@email.com' WHERE id = 5;`,
         resources: {
           videos: [
-            { title: "Normalização de Banco de Dados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=GFQaEYEc8_8", duration: "40min" },
-            { title: "Modelo Relacional e Chaves Estrangeiras", url: "https://www.youtube.com/watch?v=8wHpZDuIBmc", duration: "25min" }
+            { title: "Normalização de Banco de Dados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=NpG1Xt8LB_c", duration: "40min" },
+            { title: "Modelo Relacional e Chaves Estrangeiras", url: "https://www.youtube.com/watch?v=m4mXM99xKng", duration: "25min" }
           ],
           docs: [
             { title: "MySQL — FOREIGN KEY Constraints", url: "https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html" },
@@ -1403,8 +1399,8 @@ ORDER BY faturamento_total DESC
 LIMIT 10;  -- Top 10 produtos mais vendidos`,
         resources: {
           videos: [
-            { title: "SQL JOINs explicados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=Jh_pvk48jHA", duration: "35min" },
-            { title: "GROUP BY e Funções de Agregação em SQL", url: "https://www.youtube.com/watch?v=ufagbDYiH-M", duration: "20min" }
+            { title: "SQL JOINs explicados — Bóson Treinamentos", url: "https://www.youtube.com/watch?v=4nbECYDlAwc", duration: "35min" },
+            { title: "GROUP BY e Funções de Agregação em SQL", url: "https://www.youtube.com/watch?v=jiQhZ6v3pMU", duration: "20min" }
           ],
           docs: [
             { title: "MySQL — JOIN Syntax", url: "https://dev.mysql.com/doc/refman/8.0/en/join.html" },
@@ -1505,8 +1501,8 @@ mysql  Ver 8.0.33
 // Está tudo pronto para criar seu projeto Laravel!`,
         resources: {
           videos: [
-            { title: "Instalando Laragon — Configuração Completa", url: "https://www.youtube.com/watch?v=E4bBJPvFxSE", duration: "20min" },
-            { title: "Laragon Full Setup — Dev Hints", url: "https://www.youtube.com/watch?v=yNH2urFUxBg", duration: "15min" }
+            { title: "Instalando Laragon — Configuração Completa", url: "https://www.youtube.com/watch?v=CIhbm6xjEOs", duration: "20min" },
+            { title: "Laragon Full Setup — Dev Hints", url: "https://www.youtube.com/watch?v=CIhbm6xjEOs", duration: "15min" }
           ],
           docs: [
             { title: "Laragon.org — Site Oficial e Download", url: "https://laragon.org/download/" },
@@ -1569,7 +1565,7 @@ meu-sistema/
 └── .env  ← configurações importantes!`,
         resources: {
           videos: [
-            { title: "Criando primeiro projeto Laravel — Laracasts", url: "https://www.youtube.com/watch?v=MFh0Fd7BsjE", duration: "25min" },
+            { title: "Criando primeiro projeto Laravel — Laracasts", url: "https://www.youtube.com/watch?v=1NjOWtQ7S2o", duration: "25min" },
             { title: "Laravel do Zero — Matheus Battisti", url: "https://www.youtube.com/watch?v=qH7rsZBENJo", duration: "3h" }
           ],
           docs: [
@@ -1653,7 +1649,7 @@ INFO  Running migrations.
 // Seu banco está conectado e as tabelas foram criadas!`,
         resources: {
           videos: [
-            { title: "Laravel e MySQL — Configuração Completa", url: "https://www.youtube.com/watch?v=Lqo9-pQuBZE", duration: "20min" }
+            { title: "Laravel e MySQL — Configuração Completa", url: "https://www.youtube.com/watch?v=J4UbaSMVj-M", duration: "20min" }
           ],
           docs: [
             { title: "Laravel — Database Configuration", url: "https://laravel.com/docs/11.x/database" },
@@ -1718,7 +1714,7 @@ $produtos = Produto::where('estoque', '>', 0)
                    ->get();`,
         resources: {
           videos: [
-            { title: "Eloquent ORM Completo — Laracasts", url: "https://www.youtube.com/watch?v=7tMiNp1R7vc", duration: "45min" }
+            { title: "Eloquent ORM Completo — Laracasts", url: "https://www.youtube.com/watch?v=gHQ-OT8V5VU", duration: "45min" }
           ],
           docs: [
             { title: "Laravel — Eloquent ORM", url: "https://laravel.com/docs/11.x/eloquent" },
@@ -1785,7 +1781,7 @@ $produtos = Produto::with('categoria')
 // {{ $produto->categoria->nome }}`,
         resources: {
           videos: [
-            { title: "Laravel Eager Loading (Evitando N+1) — Coder's Tape", url: "https://www.youtube.com/watch?v=JwwR758IeEY", duration: "18min" }
+            { title: "Laravel Eager Loading (Evitando N+1) — Coder's Tape", url: "https://www.youtube.com/watch?v=bZlvzvGpCEE", duration: "18min" }
           ],
           docs: [
             { title: "Laravel — Local Scopes", url: "https://laravel.com/docs/11.x/eloquent#local-scopes" },
@@ -1870,7 +1866,7 @@ public function store(StoreProdutoRequest $request)
 }`,
         resources: {
           videos: [
-            { title: "Laravel Form Requests explicados — Laravel Daily", url: "https://www.youtube.com/watch?v=F01q8t28qM8", duration: "12min" }
+            { title: "Laravel Form Requests explicados — Laravel Daily", url: "https://www.youtube.com/watch?v=YK8GZmuf8_0", duration: "12min" }
           ],
           docs: [
             { title: "Laravel — Form Request Validation", url: "https://laravel.com/docs/11.x/validation#form-request-validation" }
@@ -1940,7 +1936,7 @@ Route::resource('produtos', ProdutoController::class);
 // > php artisan route:list`,
         resources: {
           videos: [
-            { title: "Laravel Routes e Controllers — Matheus Battisti", url: "https://www.youtube.com/watch?v=TqGQkXN9eWA", duration: "30min" }
+            { title: "Laravel Routes e Controllers — Matheus Battisti", url: "https://www.youtube.com/watch?v=qH7rsZBENJo", duration: "30min" }
           ],
           docs: [
             { title: "Laravel — Routing", url: "https://laravel.com/docs/11.x/routing" },
@@ -2003,7 +1999,7 @@ Route::resource('produtos', ProdutoController::class);
 @endsection`,
         resources: {
           videos: [
-            { title: "Blade Templates Completo — Laravel Daily", url: "https://www.youtube.com/watch?v=iFSBd9Wr3Z8", duration: "35min" }
+            { title: "Blade Templates Completo — Laravel Daily", url: "https://www.youtube.com/watch?v=CKiDWra20P0", duration: "35min" }
           ],
           docs: [
             { title: "Laravel — Blade Templates", url: "https://laravel.com/docs/11.x/blade" }
@@ -2086,7 +2082,7 @@ public function destroy(Tarefa $tarefa) {
         resources: {
           videos: [
             { title: "CRUD Completo em Laravel — Matheus Battisti", url: "https://www.youtube.com/watch?v=qH7rsZBENJo", duration: "2h 30min" },
-            { title: "Laravel CRUD do Zero — Laracasts (EN)", url: "https://www.youtube.com/watch?v=ImtZ5yENzgE", duration: "1h" }
+            { title: "Laravel CRUD do Zero — Laracasts (EN)", url: "https://www.youtube.com/watch?v=gq3dn_lmc-0", duration: "1h" }
           ],
           docs: [
             { title: "Laravel — Resource Controllers", url: "https://laravel.com/docs/11.x/controllers#resource-controllers" },
@@ -2150,7 +2146,7 @@ public function destroy(Tarefa $tarefa) {
 @endauth`,
         resources: {
           videos: [
-            { title: "Laravel Breeze — Autenticação Completa", url: "https://www.youtube.com/watch?v=DFamHnGkb_4", duration: "40min" }
+            { title: "Laravel Breeze — Autenticação Completa", url: "https://www.youtube.com/watch?v=layAvwbXGYI", duration: "40min" }
           ],
           docs: [
             { title: "Laravel — Authentication", url: "https://laravel.com/docs/11.x/authentication" },
@@ -2235,8 +2231,8 @@ public function store(Request $request)
 }`,
         resources: {
           videos: [
-            { title: "Ataque CSRF Explicado e como o Laravel previne", url: "https://www.youtube.com/watch?v=n5WJOFz4Npw", duration: "10min" },
-            { title: "Database Transactions em Laravel — Povilas Korop", url: "https://www.youtube.com/watch?v=BqB37uT7xM0", duration: "12min" }
+            { title: "Ataque CSRF Explicado e como o Laravel previne", url: "https://www.youtube.com/watch?v=ikjo5JUcTf4", duration: "10min" },
+            { title: "Database Transactions em Laravel — Povilas Korop", url: "https://www.youtube.com/watch?v=D4a4XdL3XnE", duration: "12min" }
           ],
           docs: [
             { title: "Laravel — CSRF Protection", url: "https://laravel.com/docs/11.x/csrf" },
