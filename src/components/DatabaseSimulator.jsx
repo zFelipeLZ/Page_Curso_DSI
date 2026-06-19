@@ -72,7 +72,7 @@ export default function DatabaseSimulator() {
         filteredData = INITIAL_DATABASE;
       } else {
         // Matches: select * from estudantes where col operator val
-        const matchWhere = sqlQuery.match(/select\s+\*\s+from\s+estudantes\s+where\s+([a-zA-Z0-9_]+)\s*([=>^<!]+)\s*(['"]?.*?['"]?)$/i);
+        const matchWhere = cleanSql.match(/select\s+\*\s+from\s+estudantes\s+where\s+([a-zA-Z0-9_]+)\s*([=>^<!]+)\s*(['"]?.*?['"]?)$/i);
         
         if (matchWhere) {
           const column = matchWhere[1].trim().toLowerCase();
