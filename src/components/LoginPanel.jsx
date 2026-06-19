@@ -9,6 +9,9 @@ export default function LoginPanel() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
+  const [isVisitor, setIsVisitor] = useState(false);
+  const [inviteKey, setInviteKey] = useState('');
+  
   const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -19,10 +22,10 @@ export default function LoginPanel() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Regra de Ouro: Restrição do domínio institucional
-    if (!cleanEmail.endsWith('@aluno.ifsertao-pe.edu.br')) {
+    // Regra de Ouro: Restrição do domínio institucional (a menos que seja visitante no momento do cadastro)
+    if (isSignUp && !isVisitor && !cleanEmail.endsWith('@aluno.ifsertao-pe.edu.br')) {
       setStatus('error');
-      setErrorMessage('Apenas e-mails institucionais oficiais (@aluno.ifsertao-pe.edu.br) têm acesso à plataforma.');
+      setErrorMessage('Apenas e-mails institucionais oficiais (@aluno.ifsertao-pe.edu.br) têm acesso à plataforma, a não ser que você seja um visitante com chave.');
       return;
     }
 
@@ -35,12 +38,41 @@ export default function LoginPanel() {
           throw new Error('A senha deve ter pelo menos 6 caracteres.');
         }
 
+        if (isVisitor) {
+          if (!inviteKey.trim()) {
+            throw new Error('Você precisa informar uma Chave de Acesso para se cadastrar como visitante.');
+          }
+
+          // Verificar chave no Supabase
+          const { data: keyData, error: keyErr } = await supabase
+            .from('invite_keys')
+            .select('*')
+            .eq('key_code', inviteKey.trim())
+            .single();
+
+          if (keyErr || !keyData) {
+            throw new Error('Chave de Acesso inválida ou não encontrada.');
+          }
+
+          if (keyData.is_used) {
+            throw new Error('Esta Chave de Acesso já foi utilizada por outro usuário.');
+          }
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password: password,
         });
 
         if (error) throw error;
+
+        // Se for visitante, queima a chave
+        if (isVisitor && data.user) {
+          await supabase
+            .from('invite_keys')
+            .update({ is_used: true, used_by_email: cleanEmail })
+            .eq('key_code', inviteKey.trim());
+        }
         
         // Se a configuração de confirmação de e-mail estiver ativa no Supabase:
         if (data.user && data.user.identities && data.user.identities.length === 0) {
@@ -81,6 +113,8 @@ export default function LoginPanel() {
     setErrorMessage('');
     setPassword('');
     setConfirmPassword('');
+    setIsVisitor(false);
+    setInviteKey('');
   };
 
   return (
@@ -143,9 +177,25 @@ export default function LoginPanel() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {isSignUp && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <input 
+                      type="checkbox" 
+                      id="visitor-check" 
+                      checked={isVisitor}
+                      onChange={(e) => setIsVisitor(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-900/50 text-rose-500 focus:ring-rose-500"
+                    />
+                    <label htmlFor="visitor-check" className="text-xs font-bold text-slate-300 cursor-pointer">
+                      Sou Visitante (Possuo Chave de Acesso)
+                    </label>
+                  </div>
+                )}
                 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 ml-1">E-mail Institucional</label>
+                  <label className="text-xs font-bold text-slate-400 ml-1">
+                    {isVisitor ? 'E-mail' : 'E-mail Institucional'}
+                  </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="w-5 h-5 text-slate-500" />
@@ -155,11 +205,30 @@ export default function LoginPanel() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="@aluno.ifsertao-pe.edu.br"
+                      placeholder={isVisitor ? "seu.email@exemplo.com" : "@aluno.ifsertao-pe.edu.br"}
                       className="w-full bg-slate-950/50 border border-slate-800 text-white rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600 font-medium text-sm"
                     />
                   </div>
                 </div>
+
+                {isSignUp && isVisitor && (
+                  <div className="space-y-1.5 animate-fade-in">
+                    <label className="text-xs font-bold text-slate-400 ml-1 text-rose-400">Chave de Acesso</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-rose-500/50" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={inviteKey}
+                        onChange={(e) => setInviteKey(e.target.value)}
+                        placeholder="Ex: INVITE-XXXX"
+                        className="w-full bg-rose-500/5 border border-rose-500/30 text-white rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600 font-medium text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-400 ml-1">Senha</label>

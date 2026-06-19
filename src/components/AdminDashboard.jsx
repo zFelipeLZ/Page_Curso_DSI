@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldCheck, Users, Bell, Search, Send, Loader2, CheckCircle2, User as UserIcon, FileArchive, Download, MessageSquare, RefreshCw, Trash2 } from 'lucide-react';
+import { ShieldCheck, Users, Bell, Search, Send, Loader2, CheckCircle2, User as UserIcon, FileArchive, Download, MessageSquare, RefreshCw, Trash2, Key, Sparkles } from 'lucide-react';
 import { STAGES } from '../data/lessonsData';
 
 export default function AdminDashboard({ user }) {
@@ -25,6 +25,11 @@ export default function AdminDashboard({ user }) {
   const [notifMessage, setNotifMessage] = useState('');
   const [sendingNotif, setSendingNotif] = useState(false);
   const [notifSuccess, setNotifSuccess] = useState(false);
+
+  // Tab 4: Invite Keys
+  const [inviteKeys, setInviteKeys] = useState([]);
+  const [loadingKeys, setLoadingKeys] = useState(true);
+  const [generatingKey, setGeneratingKey] = useState(false);
 
   const totalRequiredLessons = STAGES.filter(s => !s.optional).flatMap(s => s.lessons).length;
 
@@ -85,6 +90,7 @@ export default function AdminDashboard({ user }) {
   const handleRefresh = () => {
     if (activeTab === 'students') fetchStudents();
     if (activeTab === 'submissions') fetchSubmissions();
+    if (activeTab === 'invites') fetchKeys();
   };
 
   const handleResetStudent = async (studentId, studentEmail) => {
@@ -116,11 +122,55 @@ export default function AdminDashboard({ user }) {
     }
   };
 
+  const fetchKeys = useCallback(async () => {
+    setLoadingKeys(true);
+    try {
+      const { data, error } = await supabase.from('invite_keys').select('*').order('created_at', { ascending: false });
+      if (error) {
+        if (error.code === '42P01') {
+          // Tabela não existe, apenas ignora
+          setInviteKeys([]);
+          return;
+        }
+        throw error;
+      }
+      setInviteKeys(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar chaves:', err);
+    } finally {
+      setLoadingKeys(false);
+    }
+  }, []);
+
+  const handleGenerateKey = async () => {
+    setGeneratingKey(true);
+    try {
+      const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const newKey = `INVITE-${randomPart}`;
+      
+      const { error } = await supabase.from('invite_keys').insert({
+        key_code: newKey,
+        is_used: false
+      });
+      
+      if (error) throw error;
+      
+      await fetchKeys();
+      alert(`Chave gerada com sucesso: ${newKey}`);
+    } catch (err) {
+      console.error('Erro ao gerar chave:', err);
+      alert('Erro ao gerar chave. Verifique se a tabela "invite_keys" foi criada no Supabase e se o RLS permite INSERT.');
+    } finally {
+      setGeneratingKey(false);
+    }
+  };
+
   useEffect(() => {
     if (user?.role !== 'admin') return;
     fetchStudents();
     fetchSubmissions();
-  }, [user, fetchStudents, fetchSubmissions]);
+    fetchKeys();
+  }, [user, fetchStudents, fetchSubmissions, fetchKeys]);
 
   const handleSendNotification = async (e) => {
     e.preventDefault();
@@ -234,6 +284,12 @@ export default function AdminDashboard({ user }) {
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'notifications' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
           >
             <Bell className="w-4 h-4" /> Central de Notificações
+          </button>
+          <button
+            onClick={() => setActiveTab('invites')}
+            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'invites' ? 'border-purple-500 text-purple-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+          >
+            <Key className="w-4 h-4" /> Chaves de Acesso
           </button>
           
           <button
@@ -476,6 +532,72 @@ export default function AdminDashboard({ user }) {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Tab Content: Invites */}
+        {activeTab === 'invites' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-950/30 p-5 rounded-2xl border border-slate-800">
+              <div>
+                <h3 className="text-white font-bold text-lg mb-1">Chaves de Acesso (Visitantes)</h3>
+                <p className="text-slate-400 text-sm">Gere chaves para permitir o cadastro de usuários com e-mails não institucionais.</p>
+              </div>
+              <button
+                onClick={handleGenerateKey}
+                disabled={generatingKey}
+                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50"
+              >
+                {generatingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+                Gerar Nova Chave
+              </button>
+            </div>
+
+            {loadingKeys ? (
+              <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                <Loader2 className="w-8 h-8 animate-spin mb-4" />
+                <p className="text-sm font-medium">Carregando chaves...</p>
+              </div>
+            ) : inviteKeys.length === 0 ? (
+              <div className="text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800 border-dashed">
+                <Key className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                <h3 className="text-slate-300 font-bold">Nenhuma chave gerada</h3>
+                <p className="text-slate-500 text-sm mt-1">Gere uma chave para convidar visitantes para a plataforma.</p>
+              </div>
+            ) : (
+              <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-800/50 border-b border-slate-800 text-slate-400">
+                    <tr>
+                      <th className="px-6 py-4 font-semibold">Código da Chave</th>
+                      <th className="px-6 py-4 font-semibold">Status</th>
+                      <th className="px-6 py-4 font-semibold">Utilizado por</th>
+                      <th className="px-6 py-4 font-semibold">Data de Criação</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {inviteKeys.map(k => (
+                      <tr key={k.id} className="hover:bg-slate-800/30 transition-colors">
+                        <td className="px-6 py-4 font-mono font-bold text-slate-200">{k.key_code}</td>
+                        <td className="px-6 py-4">
+                          {k.is_used ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-400">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Utilizada
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <Sparkles className="w-3.5 h-3.5" /> Pendente
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-slate-400">{k.used_by_email || '-'}</td>
+                        <td className="px-6 py-4 text-slate-500">{new Date(k.created_at).toLocaleDateString('pt-BR')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
