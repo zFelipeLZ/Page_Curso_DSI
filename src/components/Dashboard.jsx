@@ -1,7 +1,7 @@
 import { STAGES, getStageStatus, isStageUnlocked } from '../data/lessonsData';
 import { 
   CheckCircle2, Lock, PlayCircle, ChevronRight, 
-  Sparkles, Star, BookOpen, Code2
+  Sparkles, Star, BookOpen, Code2, Award
 } from 'lucide-react';
 
 const TECH_COLORS = {
@@ -13,7 +13,7 @@ const TECH_COLORS = {
   Laravel: { text: 'text-rose-400',   bg: 'bg-rose-500/10',   border: 'border-rose-500/30', dot: 'bg-rose-400' },
 };
 
-export default function Dashboard({ onOpenStage, completedLessons, onSwitchView, user }) {
+export default function Dashboard({ onOpenStage, completedLessons, onSwitchView, user, projectsApprovedCount = 0 }) {
   const totalRequired = STAGES.filter(s => !s.optional).flatMap(s => s.lessons).length;
   const completedRequired = STAGES
     .filter(s => !s.optional)
@@ -23,7 +23,7 @@ export default function Dashboard({ onOpenStage, completedLessons, onSwitchView,
 
   // Encontra a primeira etapa não concluída e desbloqueada
   const currentStageIdx = STAGES.findIndex((s, i) => {
-    const unlocked = isStageUnlocked(i, STAGES, completedLessons);
+    const unlocked = user?.role === 'admin' || isStageUnlocked(i, STAGES, completedLessons);
     const status = getStageStatus(s, completedLessons);
     return unlocked && status !== 'done';
   });
@@ -56,7 +56,7 @@ export default function Dashboard({ onOpenStage, completedLessons, onSwitchView,
             </h2>
 
             <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-              Você completou <strong className="text-white">{overallPct}%</strong> da sua formação FullStack. 
+              Você completou <strong className="text-white">{overallPct}%</strong> da sua formação Web. 
               {currentStageIdx >= 0 && STAGES[currentStageIdx] && (
                 <span> Sua próxima parada é <strong className="text-rose-400">{STAGES[currentStageIdx].title}</strong>.</span>
               )}
@@ -82,16 +82,30 @@ export default function Dashboard({ onOpenStage, completedLessons, onSwitchView,
           </div>
 
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
-            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-36">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full lg:w-auto shrink-0">
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-full md:w-32">
               <BookOpen className="w-5 h-5 text-blue-400 mb-1" />
               <span className="text-2xl font-black text-slate-100">{completedRequired}</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Lições Feitas</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Lições</span>
             </div>
-            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-36">
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-full md:w-32">
               <Star className="w-5 h-5 text-amber-400 mb-1" />
               <span className="text-2xl font-black text-slate-100">{overallPct}%</span>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Progresso</span>
+            </div>
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-full md:w-32">
+              <Sparkles className="w-5 h-5 text-purple-400 mb-1" />
+              <span className="text-2xl font-black text-slate-100">{(completedRequired * 50) + (projectsApprovedCount * 200)}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total XP</span>
+            </div>
+            <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 flex flex-col gap-1 items-start w-full md:w-36">
+              <Award className="w-5 h-5 text-emerald-400 mb-1" />
+              <span className="text-sm font-black text-slate-100 leading-tight">
+                {((completedRequired * 50) + (projectsApprovedCount * 200)) < 500 ? 'Iniciante' : 
+                 ((completedRequired * 50) + (projectsApprovedCount * 200)) < 1500 ? 'Explorador' : 
+                 ((completedRequired * 50) + (projectsApprovedCount * 200)) < 3000 ? 'Dev Júnior' : 'Dev Pleno'}
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Título Atual</span>
             </div>
           </div>
 
@@ -110,12 +124,12 @@ export default function Dashboard({ onOpenStage, completedLessons, onSwitchView,
           <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-rose-500/40 via-purple-500/20 to-slate-800/50 hidden md:block" />
 
           <div className="space-y-4">
-            {STAGES.map((stage, idx) => {
+            {STAGES.map((stage, i) => {
+              const unlocked = user?.role === 'admin' || isStageUnlocked(i, STAGES, completedLessons);
               const status = getStageStatus(stage, completedLessons);
-              const unlocked = isStageUnlocked(idx, STAGES, completedLessons);
               const colors = TECH_COLORS[stage.tech] || TECH_COLORS['HTML'];
               const completedCount = stage.lessons.filter(l => completedLessons.includes(l.id)).length;
-              const isCurrent = idx === currentStageIdx;
+              const isCurrent = i === currentStageIdx;
 
               return (
                 <div

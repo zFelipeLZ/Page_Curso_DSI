@@ -15,8 +15,8 @@ const TECH_COLORS = {
 
 export default function Sidebar({
   activeView, currentStage, onSwitchView, onOpenStage,
-  globalProgress, sidebarOpen, setSidebarOpen,
-  completedLessons = [], user
+  globalProgress, sidebarOpen, setSidebarOpen, isSidebarCollapsed,
+  completedLessons = [], submittedStages = [], user
 }) {
   const close = () => setSidebarOpen(false);
 
@@ -33,26 +33,15 @@ export default function Sidebar({
 
       <aside className={`
         fixed top-0 left-0 h-screen w-72 bg-slate-900 border-r border-slate-800/80 flex flex-col z-50
-        transition-transform duration-300 ease-in-out lg:translate-x-0
+        transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}
       `}>
 
         {/* ── Logo & Progress ── */}
         <div className="px-5 py-6 border-b border-slate-800/80 shrink-0 relative overflow-hidden">
           {/* Decorative background glow */}
           <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="flex items-center gap-3 relative z-10 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20 shrink-0 preserve-color">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="font-black text-base text-slate-100 leading-tight flex items-center gap-1">
-                WebDev Pro <Sparkles className="w-3 h-3 text-rose-400 shrink-0" />
-              </h2>
-              <span className="text-[10px] font-semibold text-slate-500 tracking-widest uppercase">FullStack Academy</span>
-            </div>
-          </div>
 
           {/* Global Progress Indicator */}
           <div className="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80 flex items-center gap-3">
@@ -115,7 +104,7 @@ export default function Sidebar({
                 const { done, total, pct } = getStageProgress(stage);
                 const isActive = activeView === 'stage' && currentStage === stage.id;
                 const isDone = done === total;
-                const unlocked = isStageUnlocked(idx, STAGES, completedLessons);
+                const unlocked = user?.role === 'admin' || isStageUnlocked(idx, STAGES, completedLessons, submittedStages);
                 const colors = TECH_COLORS[stage.tech] || TECH_COLORS['HTML'];
 
                 return (

@@ -12,7 +12,11 @@ const VIEW_TITLES = {
   'admin-dashboard':{ label: 'Painel Admin', sub: 'Gerenciamento da plataforma' }
 };
 
-export default function Header({ activeView, currentStage, setSidebarOpen, isLightMode, setIsLightMode, user, onLogout, onOpenStage, onSwitchView }) {
+export default function Header({ 
+  activeView, currentStage, setSidebarOpen, 
+  isLightMode, setIsLightMode, user, onLogout, onOpenStage, onSwitchView,
+  isSidebarCollapsed, setIsSidebarCollapsed 
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchDrop, setShowSearchDrop] = useState(false);
@@ -113,6 +117,7 @@ export default function Header({ activeView, currentStage, setSidebarOpen, isLig
     <>
       <header className="sticky top-0 z-30 h-16 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between px-5 lg:px-8 shrink-0">
         <div className="flex items-center gap-4 min-w-0 flex-1">
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden text-slate-400 hover:text-slate-200 p-1.5 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer shrink-0"
@@ -120,18 +125,18 @@ export default function Header({ activeView, currentStage, setSidebarOpen, isLig
             <Menu className="w-5 h-5" />
           </button>
 
-          <div className="min-w-0 hidden sm:block">
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mb-0.5">
-              <BookOpen className="w-3 h-3 shrink-0" />
-              <span className="truncate">WebDev Pro</span>
-              {activeView !== 'dashboard' && (
-                <>
-                  <ChevronRight className="w-3 h-3 shrink-0" />
-                  <span className="truncate text-slate-400">{title}</span>
-                </>
-              )}
-            </div>
-            {sub && <p className="text-[11px] text-slate-600 font-medium truncate">{sub}</p>}
+          {/* Desktop Toggle Sidebar Button */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden lg:block text-slate-400 hover:text-slate-200 p-1.5 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer shrink-0"
+            title="Recolher menu lateral"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Logo Principal no Cabeçalho */}
+          <div className="flex items-center ml-2">
+            <img src="/logo.png" alt="WebDev Pro" className="h-10 w-auto object-contain drop-shadow-md transform hover:scale-105 transition-transform cursor-pointer" onClick={() => onSwitchView('dashboard')} />
           </div>
 
           {/* Search Bar */}

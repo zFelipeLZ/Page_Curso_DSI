@@ -40,6 +40,14 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
 }
 
+/* Efeito de clique em todos os botões */
+button {
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
 /* Light Mode Magic Inversion */
 html.light {
   filter: invert(1) hue-rotate(180deg);

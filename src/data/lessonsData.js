@@ -590,6 +590,33 @@ body {
           ],
           explanation: "Use Flexbox para componentes internos (barra de navegação, lista de botões). Use Grid para estrutura da página (layout com sidebar, grid de cards). Eles se complementam e são frequentemente usados juntos no mesmo projeto."
         }
+      },
+      {
+        id: "css-ui-project",
+        type: "project",
+        title: "Projeto Prático: Interface do Sistema CRUD",
+        level: "Intermediário",
+        badge: "Entrega Visual",
+        description: "Construa a interface (Frontend) do sistema que você dará vida no Projeto Final usando HTML e CSS.",
+        content: `
+          <h4>Sua Missão Visual</h4>
+          <p>Antes de criarmos o banco de dados e a lógica em PHP, precisamos construir a <strong>tela do nosso sistema</strong>. Esta entrega será a base visual para o seu Desafio Final.</p>
+          
+          <h4>O que você deve criar:</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><strong>Tema livre:</strong> Você escolhe! Pode ser uma loja, uma agenda, um sistema de adoção de pets, etc. (O mesmo tema será usado no Projeto Final).</li>
+            <li><strong>Página Principal (Dashboard/Listagem):</strong> Uma tela agradável que mostre uma lista (tabela ou cards) dos itens hipotéticos cadastrados.</li>
+            <li><strong>Formulário de Cadastro:</strong> Uma tela (ou área na mesma tela) contendo um formulário bem estilizado para inserir novos itens.</li>
+            <li><strong>Design Responsivo:</strong> O sistema deve se adaptar a celulares usando Flexbox ou CSS Grid.</li>
+          </ul>
+
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 my-4 text-blue-300 text-sm">
+            💡 <strong>Dica:</strong> Capriche nas cores, efeitos de hover, sombras e formato dos botões e inputs. Um bom CSS aqui vai impressionar quando o projeto for integrado ao PHP!
+          </div>
+
+          <h4>Instruções de Entrega:</h4>
+          <p>Coloque seus arquivos HTML e CSS em uma pasta, compacte-a em <code>.zip</code> e faça o upload abaixo. Esta etapa é fundamental para liberar a sua progressão!</p>
+        `
       }
     ]
   },
@@ -1394,6 +1421,40 @@ LIMIT 10;  -- Top 10 produtos mais vendidos`,
           ],
           explanation: "LEFT JOIN (ou LEFT OUTER JOIN) retorna TODOS os registros da tabela à esquerda (clientes) e os campos correspondentes da tabela da direita (pedidos). Para clientes sem pedidos, as colunas de pedidos retornam NULL — que podemos converter em 0 com COUNT() ou COALESCE()."
         }
+      },
+      {
+        id: "final-crud-project",
+        type: "project",
+        title: "Projeto Final: Sistema CRUD (PHP + MySQL)",
+        level: "Master",
+        badge: "Desafio Final",
+        description: "Desenvolva um sistema completo de gestão conectando HTML, CSS, PHP puro e MySQL para obter seu certificado.",
+        content: `
+          <h4>Sua Missão Final</h4>
+          <p>Para obter a sua certificação WebDev Pro, você deverá construir um <strong>Sistema de Gestão (CRUD)</strong> utilizando o conhecimento adquirido nas etapas obrigatórias.</p>
+          
+          <h4>Requisitos do Projeto:</h4>
+          <ul class="list-disc pl-6 space-y-2 my-3 text-slate-300">
+            <li><strong>Frontend:</strong> Interface visual em HTML e CSS (JavaScript é totalmente opcional).</li>
+            <li><strong>Backend:</strong> Lógica estruturada em PHP puro.</li>
+            <li><strong>Banco de Dados:</strong> MySQL (no mínimo 1 tabela para as operações).</li>
+            <li><strong>Operações Obrigatórias (CRUD):</strong>
+              <ul class="list-disc pl-6 mt-2 text-slate-400">
+                <li>Create: Inserir novos registros.</li>
+                <li>Read: Listar os registros cadastrados na interface.</li>
+                <li>Update: Editar um registro existente.</li>
+                <li>Delete: Excluir um registro do banco.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 my-4 text-amber-300 text-sm">
+            💡 <strong>Dica:</strong> Pode ser um sistema de gerenciamento de tarefas, cadastro de produtos ou um pequeno blog. O tema é livre!
+          </div>
+
+          <h4>Instruções de Entrega:</h4>
+          <p>Crie uma pasta com todos os seus arquivos, incluindo um arquivo <code>.sql</code> ou as queries para criarmos a sua tabela. Compacte a pasta em <code>.zip</code> e envie abaixo. Assim que o administrador aprovar seu projeto, você poderá emitir o seu certificado!</p>
+        `
       }
     ]
   },
@@ -1408,7 +1469,7 @@ LIMIT 10;  -- Top 10 produtos mais vendidos`,
     subtitle: "Instalação e configuração do projeto",
     tech: "Laravel",
     level: "Avançado",
-    optional: false,
+    optional: true,
     accent: "#f43f5e",
     glow: "rgba(244,63,94,0.15)",
     lessons: [
@@ -1540,7 +1601,7 @@ meu-sistema/
     subtitle: "MySQL, Migrations e Eloquent ORM",
     tech: "Laravel",
     level: "Avançado",
-    optional: false,
+    optional: true,
     accent: "#f43f5e",
     glow: "rgba(244,63,94,0.15)",
     lessons: [
@@ -1839,7 +1900,7 @@ public function store(StoreProdutoRequest $request)
     subtitle: "Rotas, Controllers e Views Blade",
     tech: "Laravel",
     level: "Avançado",
-    optional: false,
+    optional: true,
     accent: "#f43f5e",
     glow: "rgba(244,63,94,0.15)",
     lessons: [
@@ -1972,7 +2033,7 @@ Route::resource('produtos', ProdutoController::class);
     subtitle: "Construindo um MVP completo do zero",
     tech: "Laravel",
     level: "Master",
-    optional: false,
+    optional: true,
     accent: "#f43f5e",
     glow: "rgba(244,63,94,0.15)",
     lessons: [
@@ -2219,14 +2280,23 @@ export function getStageStatus(stage, completedLessons) {
   return 'pending';
 }
 
-export function isStageUnlocked(stageIndex, stages, completedLessons) {
+export function isStageUnlocked(stageIndex, stages, completedLessons, submittedStages = []) {
   if (stageIndex === 0) return true;
+  
   const prev = stages[stageIndex - 1];
   if (prev.optional) {
-    return isStageUnlocked(stageIndex - 1, stages, completedLessons);
+    return isStageUnlocked(stageIndex - 1, stages, completedLessons, submittedStages);
   }
+  
   const prevStatus = getStageStatus(prev, completedLessons);
-  return prevStatus === 'done';
+  if (prevStatus === 'done') return true;
+
+  // Se o aluno enviou o projeto da etapa anterior, libera a próxima etapa.
+  if (submittedStages.includes(prev.id)) {
+    return true;
+  }
+  
+  return false;
 }
 
 // Legado — mantido para não quebrar imports antigos durante a transição

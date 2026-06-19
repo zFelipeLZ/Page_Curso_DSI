@@ -91,16 +91,11 @@ export default function LoginPanel() {
 
       <div className="relative w-full max-w-md z-10 animate-fade-in">
         {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20 mb-4 preserve-color">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-black text-white flex items-center gap-2">
-            WebDev Pro <Sparkles className="w-5 h-5 text-rose-400" />
-          </h1>
-          <p className="text-slate-400 mt-2 text-center font-medium">
-            Sua Academia FullStack Exclusiva
-          </p>
+        <div className="flex justify-center mb-10 relative group">
+          {/* Efeito Glow Suave para realçar o PNG transparente */}
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 via-orange-500/20 to-rose-500/20 blur-3xl group-hover:opacity-100 opacity-60 transition-opacity duration-700 rounded-full max-w-[180px] mx-auto" />
+          
+          <img src="/logo.png" alt="WebDev Pro" className="relative z-10 w-full max-w-[180px] h-auto object-contain drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-700" />
         </div>
 
         {/* Card */}
@@ -234,6 +229,7 @@ export default function LoginPanel() {
           )}
 
           <p className="text-center text-xs text-slate-500 mt-6 font-medium">
+            Do Zero ao CRUD Funcional<br/>
             Segurança e Sincronização em Nuvem<br/>Powered by Supabase
           </p>
         </div>

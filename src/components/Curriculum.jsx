@@ -3,8 +3,9 @@ import { getStageById } from '../data/lessonsData';
 import { 
   Award, ArrowLeft, ArrowRight, CheckCircle2, Play,
   BookOpen, X, Video, FileText, ExternalLink, Star,
-  Clock, Eye, Lock, AlertTriangle, Info, Zap
+  Clock, Eye, Lock, AlertTriangle, Info, Zap, UploadCloud, FileArchive, Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import Cheatsheet from './Cheatsheet';
 
 // ── Material Card (Novo formato premium sem iframe problemático) ──────────────
@@ -26,9 +27,33 @@ function MaterialCard({ videoUrl, videoTitle }) {
 }
 
 // ── Quiz Panel ────────────────────────────────────────────────────────────────
-function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeIdx, setActiveIdx, lessonsLength }) {
+function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeIdx, setActiveIdx, lessonsLength, user }) {
   const [selectedOpt, setSelectedOpt] = useState(null);
   const [quizStatus, setQuizStatus] = useState(null);
+  const [lockoutTime, setLockoutTime] = useState(null);
+
+  useEffect(() => {
+    const lockKey = `quiz_lockout_${user?.id}_${activeLesson.id}`;
+    const lockedUntil = localStorage.getItem(lockKey);
+    if (lockedUntil && Date.now() < parseInt(lockedUntil)) {
+       setLockoutTime(parseInt(lockedUntil));
+    } else {
+       setLockoutTime(null);
+       localStorage.removeItem(lockKey);
+    }
+  }, [activeLesson.id, user]);
+
+  useEffect(() => {
+    if (lockoutTime) {
+      const remaining = lockoutTime - Date.now();
+      if (remaining > 0) {
+        const timer = setTimeout(() => setLockoutTime(null), remaining);
+        return () => clearTimeout(timer);
+      } else {
+        setLockoutTime(null);
+      }
+    }
+  }, [lockoutTime]);
 
   const handleSelectOption = (idx) => {
     if (isLessonCompleted) return; // Se já concluiu, não altera resposta
@@ -44,6 +69,9 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
       onCompleteLesson(activeLesson.id);
     } else {
       setQuizStatus('incorrect');
+      const unlockTime = Date.now() + 2 * 60 * 60 * 1000; // 2 hours
+      localStorage.setItem(`quiz_lockout_${user?.id}_${activeLesson.id}`, unlockTime);
+      setLockoutTime(unlockTime);
     }
   };
 
@@ -90,9 +118,9 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
             <button
               key={idx}
               onClick={() => handleSelectOption(idx)}
-              disabled={isLessonCompleted}
+              disabled={isLessonCompleted || (lockoutTime && lockoutTime > Date.now())}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-xs font-semibold transition-all duration-200 ${
-                isLessonCompleted ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:border-indigo-500/40'
+                isLessonCompleted || (lockoutTime && lockoutTime > Date.now()) ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:border-indigo-500/40'
               } ${styleClasses}`}
             >
               <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 font-bold text-[10px] ${selected ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300' : 'border-slate-700 text-slate-500'}`}>
@@ -111,10 +139,16 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
           <p className="text-xs text-emerald-300/80 leading-relaxed">{activeLesson.quiz.explanation}</p>
         </div>
       )}
-      {quizStatus === 'incorrect' && (
+      {quizStatus === 'incorrect' && (!lockoutTime || lockoutTime <= Date.now()) && (
         <div className="bg-red-500/10 border border-red-500/30 border-l-4 border-l-red-500 rounded-xl p-4 space-y-1">
           <p className="text-xs font-black text-red-400 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Resposta Incorreta!</p>
           <p className="text-xs text-red-300/80 leading-relaxed">Não desanime! Releia o conteúdo acima com atenção e tente novamente.</p>
+        </div>
+      )}
+      {lockoutTime && lockoutTime > Date.now() && (
+        <div className="bg-red-500/10 border border-red-500/30 border-l-4 border-l-red-500 rounded-xl p-4 space-y-1 animate-pulse-once">
+          <p className="text-xs font-black text-red-400 flex items-center gap-1.5"><Lock className="w-4 h-4" /> Bloqueio Temporário por Erro!</p>
+          <p className="text-xs text-red-300/80 leading-relaxed">Você errou a resposta do quiz e deve revisar o material. O quiz ficará bloqueado para novas tentativas até <strong>{new Date(lockoutTime).toLocaleTimeString()} (2 horas)</strong>.</p>
         </div>
       )}
 
@@ -131,9 +165,9 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
         {!isLessonCompleted && (
           <button
             onClick={handleCheckAnswer}
-            disabled={selectedOpt === null}
+            disabled={selectedOpt === null || (lockoutTime && lockoutTime > Date.now())}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-bold transition-all ${
-              selectedOpt !== null
+              selectedOpt !== null && (!lockoutTime || lockoutTime <= Date.now())
                 ? 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer shadow-lg shadow-indigo-500/20'
                 : 'bg-slate-700 opacity-50 cursor-not-allowed'
             }`}
@@ -142,7 +176,7 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
           </button>
         )}
 
-        {isLessonCompleted && activeIdx < lessonsLength - 1 && (
+        {activeIdx < lessonsLength - 1 && (
           <button
             onClick={() => setActiveIdx(prev => Math.min(lessonsLength - 1, prev + 1))}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
@@ -151,6 +185,191 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Project Upload Panel ──────────────────────────────────────────────────────
+function ProjectUploadPanel({ activeLesson, isLessonCompleted, onCompleteLesson, user, stageId, setSubmittedStages }) {
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [submission, setSubmission] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Busca submissão existente
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    const fetchSubmission = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('project_submissions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('stage_id', stageId)
+          .single();
+        if (data) setSubmission(data);
+        if (data?.status === 'aprovado' && !isLessonCompleted) {
+          onCompleteLesson();
+        }
+      } catch (err) {
+        // ignora se não achou (PGRST116)
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubmission();
+  }, [user, stageId, isLessonCompleted, onCompleteLesson]);
+
+  const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (selected && (selected.name.endsWith('.zip') || selected.type === 'application/zip' || selected.type === 'application/x-zip-compressed')) {
+      setFile(selected);
+    } else {
+      alert('Por favor, selecione apenas arquivos .zip');
+      e.target.value = '';
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}_${stageId}_${Date.now()}.${fileExt}`;
+      const filePath = `uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('projects')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('projects').getPublicUrl(filePath);
+
+      const submissionData = {
+        user_id: user.id,
+        stage_id: stageId,
+        file_url: urlData.publicUrl,
+        file_name: file.name,
+        status: 'pendente',
+      };
+
+      const { error: dbError } = await supabase
+        .from('project_submissions')
+        .upsert(submissionData, { onConflict: 'user_id, stage_id' });
+
+      if (dbError) throw dbError;
+
+      setSubmission({ ...submissionData, feedback: null, grade: null });
+      setFile(null);
+      
+      // Atualiza o estado global de estágios enviados
+      if (setSubmittedStages) {
+        setSubmittedStages(prev => [...prev, stageId]);
+      }
+
+      alert('Projeto enviado com sucesso! A próxima etapa já foi liberada, mas a barra de progresso só subirá quando o administrador aprovar o projeto.');
+      
+      // Removemos a conclusão otimista para o Modo Estrito
+      // A etapa seguinte é liberada, mas o progresso (para o certificado) fica pendente
+    } catch (err) {
+      console.error('Erro no upload:', err);
+      alert('Falha ao enviar arquivo. Verifique se o bucket "projects" foi criado e tente novamente.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCancelUpload = async () => {
+    if (!submission || submission.status !== 'pendente') return;
+    if (!window.confirm('Tem certeza que deseja cancelar este envio? O arquivo será removido e você precisará enviar novamente.')) return;
+    
+    setUploading(true);
+    try {
+      const { error } = await supabase
+        .from('project_submissions')
+        .delete()
+        .eq('id', submission.id);
+
+      if (error) throw error;
+      setSubmission(null);
+      setFile(null);
+      alert('Envio cancelado com sucesso.');
+    } catch (err) {
+      console.error('Erro ao cancelar:', err);
+      alert('Falha ao cancelar o envio.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
+  }
+
+  return (
+    <div className="border rounded-2xl p-6 mt-8 bg-slate-900/60 border-indigo-500/30">
+      <div className="flex items-center gap-2 border-b border-slate-800/60 pb-3 mb-6">
+        <UploadCloud className="w-5 h-5 text-indigo-400" />
+        <h5 className="font-extrabold text-sm tracking-tight text-slate-200">Envio de Projeto Prático</h5>
+      </div>
+
+      {submission ? (
+        <div className="space-y-4">
+          <div className={`p-4 rounded-xl border ${submission.status === 'aprovado' ? 'bg-emerald-500/10 border-emerald-500/30' : submission.status === 'reprovado' ? 'bg-rose-500/10 border-rose-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Status da Avaliação</span>
+              <span className={`text-xs font-black uppercase px-2 py-1 rounded-md ${submission.status === 'aprovado' ? 'bg-emerald-500 text-white' : submission.status === 'reprovado' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'}`}>
+                {submission.status}
+              </span>
+            </div>
+            
+            <p className="text-sm text-slate-300 font-semibold flex items-center gap-2">
+              <FileArchive className="w-4 h-4" /> {submission.file_name}
+            </p>
+
+            {submission.feedback && (
+              <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <p className="text-xs font-bold text-slate-400 mb-1">Feedback do Professor:</p>
+                <p className="text-sm text-slate-200 italic">"{submission.feedback}"</p>
+                {submission.grade && <p className="text-xs font-bold mt-2 text-indigo-400">Nota: {submission.grade}</p>}
+              </div>
+            )}
+          </div>
+
+          {submission.status !== 'aprovado' && (
+             <div className="pt-4 mt-4 border-t border-slate-800">
+               <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Enviar novo arquivo (Substitui o atual)</p>
+               <div className="flex gap-2">
+                 <input type="file" accept=".zip" onChange={handleFileChange} className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20" />
+                 <button onClick={handleUpload} disabled={!file || uploading} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm disabled:opacity-50 flex items-center gap-2 shrink-0">
+                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} Enviar
+                 </button>
+               </div>
+               {submission.status === 'pendente' && (
+                 <div className="mt-4 flex justify-end">
+                   <button onClick={handleCancelUpload} disabled={uploading} className="text-xs font-bold text-rose-400 hover:text-rose-300 underline underline-offset-2">
+                     Cancelar Envio Atual
+                   </button>
+                 </div>
+               )}
+             </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm text-slate-300">Nenhum projeto enviado ainda. Compacte seus arquivos em <b>.zip</b> e faça o upload abaixo.</p>
+          <div className="flex gap-2">
+            <input type="file" accept=".zip" onChange={handleFileChange} className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20" />
+            <button onClick={handleUpload} disabled={!file || uploading} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm disabled:opacity-50 flex items-center gap-2 shrink-0">
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />} Enviar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -246,7 +465,9 @@ export default function Curriculum({
   stageKey, 
   onSwitchView, 
   completedLessons,
-  onCompleteLesson
+  onCompleteLesson,
+  user,
+  setSubmittedStages
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [showCheatsheet, setShowCheatsheet] = useState(false);
@@ -302,17 +523,30 @@ export default function Curriculum({
             <div className="border border-violet-500/30 bg-violet-500/5 rounded-xl p-5" dangerouslySetInnerHTML={{ __html: activeLesson.challenge }} />
           )}
 
-          <MaterialsPanel resources={activeLesson.resources} />
+          {activeLesson.type !== 'project' && <MaterialsPanel resources={activeLesson.resources} />}
         </div>
 
-        <QuizPanel 
-          activeLesson={activeLesson}
-          isLessonCompleted={isLessonCompleted}
-          onCompleteLesson={() => onCompleteLesson(activeLesson.id)}
-          activeIdx={activeIdx}
-          setActiveIdx={setActiveIdx}
-          lessonsLength={lessons.length}
-        />
+        {activeLesson.type === 'project' ? (
+          <ProjectUploadPanel
+            activeLesson={activeLesson}
+            isLessonCompleted={isLessonCompleted}
+            onCompleteLesson={() => onCompleteLesson(activeLesson.id)}
+            user={user}
+            stageId={stage.id}
+            setSubmittedStages={setSubmittedStages}
+          />
+        ) : (
+          <QuizPanel 
+            key={activeLesson.id}
+            activeLesson={activeLesson}
+            isLessonCompleted={isLessonCompleted}
+            onCompleteLesson={() => onCompleteLesson(activeLesson.id)}
+            activeIdx={activeIdx}
+            setActiveIdx={setActiveIdx}
+            lessonsLength={lessons.length}
+            user={user}
+          />
+        )}
       </article>
 
       {/* ── Cheatsheet Modal ── */}

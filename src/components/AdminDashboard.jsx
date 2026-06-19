@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldCheck, Users, Bell, Search, Send, Loader2, CheckCircle2, User as UserIcon } from 'lucide-react';
+import { ShieldCheck, Users, Bell, Search, Send, Loader2, CheckCircle2, User as UserIcon, FileArchive, Download, MessageSquare, RefreshCw, Trash2 } from 'lucide-react';
 import { STAGES } from '../data/lessonsData';
 
 export default function AdminDashboard({ user }) {
@@ -9,6 +9,14 @@ export default function AdminDashboard({ user }) {
   // Tab 1: Students
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
+
+  // Tab 3: Submissions
+  const [submissions, setSubmissions] = useState([]);
+  const [loadingSubs, setLoadingSubs] = useState(true);
+  const [selectedSub, setSelectedSub] = useState(null);
+  const [grade, setGrade] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [submittingGrade, setSubmittingGrade] = useState(false);
   
   // Tab 2: Notifications
   const [notifType, setNotifType] = useState('global'); // 'global' or 'private'
@@ -20,50 +28,99 @@ export default function AdminDashboard({ user }) {
 
   const totalRequiredLessons = STAGES.filter(s => !s.optional).flatMap(s => s.lessons).length;
 
+  const fetchStudents = useCallback(async () => {
+    setLoadingStudents(true);
+    try {
+      const { data: profiles, error: profileErr } = await supabase.from('profiles').select('*').eq('role', 'student');
+      if (profileErr) throw profileErr;
+
+      const { data: progresses, error: progErr } = await supabase.from('user_progress').select('user_id, completed_lessons');
+      if (progErr) throw progErr;
+
+      const combined = (profiles || []).map(p => {
+        const prog = progresses?.find(pr => pr.user_id === p.id);
+        const completedCount = prog?.completed_lessons?.length || 0;
+        const pct = Math.round((completedCount / totalRequiredLessons) * 100);
+        return { ...p, completedCount, pct: Math.min(pct, 100) };
+      });
+
+      combined.sort((a, b) => b.pct - a.pct);
+      setStudents(combined);
+    } catch (err) {
+      console.error('Erro ao buscar alunos:', err);
+    } finally {
+      setLoadingStudents(false);
+    }
+  }, [totalRequiredLessons]);
+
+  const fetchSubmissions = useCallback(async () => {
+    setLoadingSubs(true);
+    try {
+      const { data: subsData, error: subsErr } = await supabase
+        .from('project_submissions')
+        .select('*');
+      if (subsErr) throw subsErr;
+
+      // Busca perfis para pegar o e-mail
+      const { data: profilesData } = await supabase.from('profiles').select('id, email');
+      
+      const combinedSubs = (subsData || []).map(sub => {
+        const profile = (profilesData || []).find(p => p.id === sub.user_id);
+        return { ...sub, profiles: { email: profile?.email || 'Usuário Desconhecido' } };
+      });
+
+      const sorted = combinedSubs.sort((a, b) => {
+        if (a.status === 'pendente' && b.status !== 'pendente') return -1;
+        if (a.status !== 'pendente' && b.status === 'pendente') return 1;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      setSubmissions(sorted);
+    } catch (err) {
+      console.error('Erro ao buscar submissões:', err);
+    } finally {
+      setLoadingSubs(false);
+    }
+  }, []);
+
+  const handleRefresh = () => {
+    if (activeTab === 'students') fetchStudents();
+    if (activeTab === 'submissions') fetchSubmissions();
+  };
+
+  const handleResetStudent = async (studentId, studentEmail) => {
+    if (!window.confirm(`Tem certeza que deseja RESETAR todo o progresso do aluno ${studentEmail}? Isso apagará as aulas concluídas e os projetos enviados dele.`)) {
+      return;
+    }
+    try {
+      const { data: d1, error: err1 } = await supabase.from('user_progress').update({ completed_lessons: [] }).eq('user_id', studentId).select();
+      if (err1 || !d1 || d1.length === 0) {
+        console.warn('Update failed or RLS blocked. Attempting delete...');
+        const { data: dDelete, error: errDelete } = await supabase.from('user_progress').delete().eq('user_id', studentId).select();
+        if (errDelete || !dDelete || dDelete.length === 0) {
+           console.error("Falha total ao resetar user_progress. Provavelmente falta a política de DELETE/UPDATE para administradores no banco de dados.");
+           alert("ATENÇÃO: O banco de dados (Supabase) bloqueou a ação. Você precisa ir no painel do Supabase > Authentication > Policies e habilitar o UPDATE e DELETE na tabela 'user_progress' para administradores.");
+        }
+      }
+      
+      const { data: d2, error: err2 } = await supabase.from('project_submissions').delete().eq('user_id', studentId).select();
+      if (err2 || !d2 || d2.length === 0) {
+        console.warn('Delete submissions failed or RLS blocked. Attempting update...');
+        await supabase.from('project_submissions').update({ status: 'pendente', file_url: null, feedback: null, grade: null }).eq('user_id', studentId);
+      }
+
+      alert('Progresso resetado com sucesso!');
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao resetar progresso.');
+    }
+  };
+
   useEffect(() => {
     if (user?.role !== 'admin') return;
-
-    const fetchStudents = async () => {
-      setLoadingStudents(true);
-      try {
-        // Fetch profiles
-        const { data: profiles, error: profileErr } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('role', 'student');
-
-        if (profileErr) throw profileErr;
-
-        // Fetch progress for these profiles
-        const { data: progresses, error: progErr } = await supabase
-          .from('user_progress')
-          .select('user_id, completed_lessons');
-
-        if (progErr) throw progErr;
-
-        const combined = (profiles || []).map(p => {
-          const prog = progresses?.find(pr => pr.user_id === p.id);
-          const completedCount = prog?.completed_lessons?.length || 0;
-          const pct = Math.round((completedCount / totalRequiredLessons) * 100);
-          return {
-            ...p,
-            completedCount,
-            pct: Math.min(pct, 100)
-          };
-        });
-
-        // Ordenar por progresso desc
-        combined.sort((a, b) => b.pct - a.pct);
-        setStudents(combined);
-      } catch (err) {
-        console.error('Erro ao buscar alunos:', err);
-      } finally {
-        setLoadingStudents(false);
-      }
-    };
-
     fetchStudents();
-  }, [user, totalRequiredLessons]);
+    fetchSubmissions();
+  }, [user, fetchStudents, fetchSubmissions]);
 
   const handleSendNotification = async (e) => {
     e.preventDefault();
@@ -95,6 +152,35 @@ export default function AdminDashboard({ user }) {
     }
   };
 
+  const handleEvaluate = async (status) => {
+    if (!selectedSub) return;
+    if (status === 'reprovado' && !feedback.trim()) {
+      alert('Para reprovar, é necessário enviar um feedback orientando o aluno.');
+      return;
+    }
+
+    setSubmittingGrade(true);
+    try {
+      const { error } = await supabase
+        .from('project_submissions')
+        .update({ status, grade: grade || null, feedback })
+        .eq('id', selectedSub.id);
+
+      if (error) throw error;
+
+      // Atualiza estado local
+      setSubmissions(prev => prev.map(s => s.id === selectedSub.id ? { ...s, status, grade, feedback } : s));
+      setSelectedSub(null);
+      setGrade('');
+      setFeedback('');
+    } catch (err) {
+      console.error('Erro ao avaliar:', err);
+      alert('Erro ao salvar avaliação.');
+    } finally {
+      setSubmittingGrade(false);
+    }
+  };
+
   if (user?.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-400">
@@ -116,23 +202,45 @@ export default function AdminDashboard({ user }) {
           </div>
           <div>
             <h1 className="text-2xl font-black text-white">Painel do Administrador</h1>
-            <p className="text-slate-400 text-sm">Gerencie o progresso dos alunos e envie notificações gerais.</p>
+            <p className="text-slate-400 text-sm">Gerencie o progresso dos alunos e avalie projetos.</p>
           </div>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('switch-view', { detail: 'dashboard' }))}
+            className="ml-auto flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-sm font-bold transition-colors"
+          >
+            <Search className="w-4 h-4" /> Visualizar Aulas
+          </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-800/80 mb-6">
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-800/80 mb-6">
           <button
             onClick={() => setActiveTab('students')}
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'students' ? 'border-rose-500 text-rose-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
           >
-            <Users className="w-4 h-4" /> Visão Geral dos Alunos
+            <Users className="w-4 h-4" /> Visão Geral
+          </button>
+          <button
+            onClick={() => setActiveTab('submissions')}
+            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'submissions' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+          >
+            <FileArchive className="w-4 h-4" /> Avaliações Pendentes
+            {submissions.filter(s => s.status === 'pendente').length > 0 && (
+              <span className="ml-1 bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{submissions.filter(s => s.status === 'pendente').length}</span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('notifications')}
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'notifications' ? 'border-amber-500 text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
           >
             <Bell className="w-4 h-4" /> Central de Notificações
+          </button>
+          
+          <button
+            onClick={handleRefresh}
+            className="ml-auto px-4 py-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors flex items-center gap-2 border border-slate-700"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Atualizar Dados
           </button>
         </div>
 
@@ -156,7 +264,8 @@ export default function AdminDashboard({ user }) {
                       <th className="py-3 px-4">Aluno (E-mail)</th>
                       <th className="py-3 px-4 text-center">Progresso (%)</th>
                       <th className="py-3 px-4 text-center">Lições Feitas</th>
-                      <th className="py-3 px-4 text-right">Data de Inscrição</th>
+                      <th className="py-3 px-4 text-center">Data de Inscrição</th>
+                      <th className="py-3 px-4 text-right">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/40">
@@ -181,13 +290,109 @@ export default function AdminDashboard({ user }) {
                         <td className="py-3 px-4 text-center text-sm text-slate-400">
                           {st.completedCount} / {totalRequiredLessons}
                         </td>
-                        <td className="py-3 px-4 text-right text-xs text-slate-500">
+                        <td className="py-3 px-4 text-center text-xs text-slate-500">
                           {new Date(st.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => handleResetStudent(st.id, st.email)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded transition-colors border border-red-500/20"
+                            title="Resetar progresso e avaliações deste aluno"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Resetar
+                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab Content: Submissions */}
+        {activeTab === 'submissions' && (
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_350px] gap-6 items-start">
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-200">Projetos Recebidos</h3>
+              {loadingSubs ? (
+                <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-emerald-500" /></div>
+              ) : submissions.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 text-sm border border-slate-800 rounded-xl">Nenhuma submissão recebida.</div>
+              ) : (
+                <div className="space-y-1">
+                  {Object.entries(
+                    submissions.reduce((acc, sub) => {
+                      const email = sub.profiles?.email || 'Aluno Desconhecido';
+                      if (!acc[email]) acc[email] = [];
+                      acc[email].push(sub);
+                      return acc;
+                    }, {})
+                  ).map(([email, userSubs]) => (
+                    <div key={email} className="mb-6 last:mb-0">
+                      <h4 className="text-sm font-bold text-slate-300 mb-3 pb-2 border-b border-slate-800 flex items-center gap-2">
+                        <UserIcon className="w-4 h-4 text-emerald-400" /> {email}
+                        <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">{userSubs.length} envio(s)</span>
+                      </h4>
+                      <div className="space-y-3 pl-2 border-l-2 border-slate-800/60">
+                        {userSubs.map(sub => (
+                          <button
+                            key={sub.id}
+                            onClick={() => setSelectedSub(sub)}
+                            className={`w-full text-left p-4 rounded-xl border transition-all ${selectedSub?.id === sub.id ? 'bg-slate-800 border-emerald-500/50 shadow-lg' : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'}`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{sub.stage_id}</span>
+                              <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${sub.status === 'pendente' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : sub.status === 'aprovado' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`}>
+                                {sub.status}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 flex items-center gap-1"><FileArchive className="w-3 h-3" /> {sub.file_name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Painel de Avaliação do Projeto Selecionado */}
+            {selectedSub ? (
+              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 sticky top-24">
+                <h4 className="text-sm font-black text-slate-200 mb-4 flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-emerald-400" /> Avaliar Projeto
+                </h4>
+                
+                <a href={selectedSub.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 hover:bg-slate-800 text-emerald-400 font-bold text-sm border border-emerald-500/30 rounded-xl mb-6 transition-colors">
+                  <Download className="w-4 h-4" /> Baixar Arquivo .zip
+                </a>
+
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nota (Opcional)</label>
+                    <input type="number" min="0" max="100" placeholder="Ex: 100" value={grade} onChange={e => setGrade(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Feedback para o Aluno</label>
+                    <textarea rows="4" placeholder="Escreva o feedback aqui..." value={feedback} onChange={e => setFeedback(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 resize-none" />
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => handleEvaluate('reprovado')} disabled={submittingGrade} className="flex-1 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold rounded-xl border border-rose-500/30 text-xs transition-colors">
+                      Reprovar
+                    </button>
+                    <button onClick={() => handleEvaluate('aprovado')} disabled={submittingGrade} className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-colors shadow-lg shadow-emerald-500/20">
+                      Aprovar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="hidden md:flex flex-col items-center justify-center p-8 bg-slate-900/30 border border-slate-800 border-dashed rounded-2xl text-slate-500 text-center sticky top-24">
+                <FileArchive className="w-12 h-12 mb-3 opacity-20" />
+                <p className="text-sm font-semibold">Selecione um projeto ao lado para avaliá-lo.</p>
               </div>
             )}
           </div>

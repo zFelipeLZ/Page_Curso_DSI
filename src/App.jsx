@@ -1,24 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import Dashboard from './components/Dashboard';
-import Curriculum from './components/Curriculum';
-import Playground from './components/Playground';
-import PHPSimulator from './components/PHPSimulator';
-import DatabaseSimulator from './components/DatabaseSimulator';
-import Cheatsheet from './components/Cheatsheet';
-import AdminDashboard from './components/AdminDashboard';
 import LoginPanel from './components/LoginPanel';
+
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Curriculum = lazy(() => import('./components/Curriculum'));
+const Playground = lazy(() => import('./components/Playground'));
+const PHPSimulator = lazy(() => import('./components/PHPSimulator'));
+const DatabaseSimulator = lazy(() => import('./components/DatabaseSimulator'));
+const Cheatsheet = lazy(() => import('./components/Cheatsheet'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 import { supabase } from './lib/supabase';
 import { fireConfetti } from './utils/confetti';
 import { STAGES, REQUIRED_LESSON_IDS } from './data/lessonsData';
-import { Award, Printer, X, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
+import { Award, Printer, X, Sparkles, CheckCircle2, Loader2, Lock } from 'lucide-react';
 
 export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [currentStage, setCurrentStage] = useState('stage-html');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [toast, setToast] = useState(null);
+  const [projectsApprovedCount, setProjectsApprovedCount] = useState(0);
+  const [submittedStages, setSubmittedStages] = useState([]); // Estágios com projeto enviado
 
   // Auth State
   const [user, setUser] = useState(null);
@@ -103,6 +107,7 @@ export default function App() {
         handleUserLogin(session.user);
       } else {
         setUser(null);
+        setCompletedLessons([]); // Zera o progresso localmente ao deslogar
         setLoadingAuth(false);
       }
     });
@@ -139,22 +144,22 @@ export default function App() {
       }
 
       let cloudLessons = data?.completed_lessons || [];
+
+      // Fetch all projects submissions to track pending and approved
+      const { data: subsData } = await supabase
+        .from('project_submissions')
+        .select('status, stage_id')
+        .eq('user_id', currentUser.id);
+        
+      const approved = subsData?.filter(s => s.status === 'aprovado').length || 0;
+      setProjectsApprovedCount(approved);
       
-      // Auto-Migration: Mescla o local (localStorage) com o da nuvem
-      // Set remove duplicatas
-      const merged = Array.from(new Set([...completedLessons, ...cloudLessons]));
-
-      // Se o local tiver algo a mais que a nuvem, já faz um UPSERT
-      if (merged.length > cloudLessons.length || !data) {
-        await supabase
-          .from('user_progress')
-          .upsert({ 
-            user_id: currentUser.id, 
-            completed_lessons: merged 
-          });
-      }
-
-      setCompletedLessons(merged);
+      const submitted = subsData?.map(s => s.stage_id) || [];
+      setSubmittedStages(submitted);
+      
+      // O usuário solicitou que novas contas comecem com 0%. 
+      // Por isso, removemos o "merged" e usamos estritamente os dados da nuvem.
+      setCompletedLessons(cloudLessons);
     } catch (e) {
       console.error(e);
     } finally {
@@ -215,6 +220,12 @@ export default function App() {
 
   const handleSwitchView = (view) => setActiveView(view);
 
+  useEffect(() => {
+    const handleSwitchViewEvent = (e) => setActiveView(e.detail);
+    window.addEventListener('switch-view', handleSwitchViewEvent);
+    return () => window.removeEventListener('switch-view', handleSwitchViewEvent);
+  }, []);
+
   const handleLogout = async () => {
     setCompletedLessons([]);
     setUser(null);
@@ -270,16 +281,20 @@ export default function App() {
         globalProgress={globalProgress}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        isSidebarCollapsed={isSidebarCollapsed}
         completedLessons={completedLessons}
+        submittedStages={submittedStages}
         user={user}
       />
 
       {/* Main */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'lg:pl-0' : 'lg:pl-72'}`}>
         <Header
           activeView={activeView}
           currentStage={currentStage}
           setSidebarOpen={setSidebarOpen}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
           isLightMode={isLightMode}
           setIsLightMode={setIsLightMode}
           user={user}
@@ -288,8 +303,7 @@ export default function App() {
           onSwitchView={handleSwitchView}
         />
 
-        <main className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto space-y-8">
-
+        <main className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto space-y-8 relative overflow-x-hidden">
           {/* Certificate ready banner */}
           {globalProgress === 100 && (
             <div className="bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-transparent border border-amber-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-5 shadow-lg shadow-amber-500/5 animate-pulse">
@@ -298,48 +312,61 @@ export default function App() {
                   <Award className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm md:text-base text-amber-200">Parabéns! Jornada 100% Concluída</h4>
-                  <p className="text-xs text-slate-400 mt-0.5">Seu certificado premium está pronto para ser emitido.</p>
+                  <h4 className="font-extrabold text-sm md:text-base text-amber-200">Parabéns! Jornada Concluída</h4>
+                  {projectsApprovedCount >= 2 ? (
+                    <p className="text-xs text-slate-400 mt-0.5">Seu certificado premium está pronto para ser emitido.</p>
+                  ) : (
+                    <p className="text-xs text-amber-500/80 mt-0.5">Aguardando avaliação dos seus Projetos Práticos para liberação.</p>
+                  )}
                 </div>
               </div>
-              <button
-                onClick={() => setShowCertModal(true)}
-                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 text-xs font-black rounded-xl shadow-lg cursor-pointer transition-all hover:scale-105 shrink-0"
-              >
-                Emitir Meu Certificado
-              </button>
+              {projectsApprovedCount >= 2 ? (
+                <button
+                  onClick={() => setShowCertModal(true)}
+                  className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 text-xs font-black rounded-xl shadow-lg cursor-pointer transition-all hover:scale-105 shrink-0"
+                >
+                  Emitir Meu Certificado
+                </button>
+              ) : (
+                <button
+                  disabled
+                  className="px-5 py-2.5 bg-slate-800 text-slate-500 text-xs font-black rounded-xl shadow-lg cursor-not-allowed shrink-0 border border-slate-700"
+                >
+                  <Lock className="w-4 h-4 inline-block mr-1" /> Certificado Bloqueado
+                </button>
+              )}
             </div>
           )}
 
-          {/* Views */}
-          {activeView === 'dashboard' && (
-            <Dashboard
-              onOpenStage={handleOpenStage}
-              completedLessons={completedLessons}
-              onSwitchView={handleSwitchView}
-              user={user}
-            />
-          )}
-
-          {activeView === 'stage' && (
-            <Curriculum
-              key={currentStage}
-              stageKey={currentStage}
-              completedLessons={completedLessons}
-              onCompleteLesson={handleCompleteLesson}
-              onSwitchView={handleSwitchView}
-            />
-          )}
-
-          {activeView === 'playground' && <Playground />}
-          {activeView === 'php-simulator' && <PHPSimulator />}
-          {activeView === 'db-simulator' && <DatabaseSimulator />}
-          {activeView === 'cheatsheet' && <Cheatsheet />}
-          {activeView === 'admin-dashboard' && <AdminDashboard user={user} />}
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full min-h-[50vh]">
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            </div>
+          }>
+            {/* Views */}
+            {activeView === 'dashboard' && <Dashboard onOpenStage={handleOpenStage} completedLessons={completedLessons} onSwitchView={handleSwitchView} user={user} projectsApprovedCount={projectsApprovedCount} />}
+            {activeView === 'admin' && user?.role === 'admin' && <AdminDashboard user={user} />}
+            {activeView === 'stage' && (
+              <Curriculum
+                key={currentStage}
+                stageKey={currentStage}
+                completedLessons={completedLessons}
+                onCompleteLesson={handleCompleteLesson}
+                onSwitchView={handleSwitchView}
+                setSubmittedStages={setSubmittedStages}
+                user={user}
+              />
+            )}
+            {activeView === 'playground' && <Playground />}
+            {activeView === 'php-simulator' && <PHPSimulator />}
+            {activeView === 'db-simulator' && <DatabaseSimulator />}
+            {activeView === 'cheatsheet' && <Cheatsheet />}
+            {activeView === 'admin-dashboard' && user?.role === 'admin' && <AdminDashboard user={user} />}
+          </Suspense>
 
           {/* Footer */}
           <div className="border-t border-slate-900 pt-8 mt-12 flex flex-wrap gap-4 items-center justify-between text-xs text-slate-600 font-semibold select-none">
-            <span>© 2026 Web Dev Lab — Do HTML ao Laravel.</span>
+            <span>© 2026 WebDev Pro — Desenvolvimento Web Prático.</span>
             <button
               onClick={handleResetProgress}
               className="text-slate-600 hover:text-red-400 uppercase tracking-wider transition-colors cursor-pointer"
