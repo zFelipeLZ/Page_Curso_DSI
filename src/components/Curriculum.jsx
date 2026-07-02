@@ -69,7 +69,7 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
       onCompleteLesson(activeLesson.id);
     } else {
       setQuizStatus('incorrect');
-      const unlockTime = Date.now() + 2 * 60 * 60 * 1000; // 2 hours
+      const unlockTime = Date.now() + 15 * 60 * 1000; // 15 minutes
       localStorage.setItem(`quiz_lockout_${user?.id}_${activeLesson.id}`, unlockTime);
       setLockoutTime(unlockTime);
     }
@@ -148,7 +148,7 @@ function QuizPanel({ activeLesson, isLessonCompleted, onCompleteLesson, activeId
       {lockoutTime && lockoutTime > Date.now() && (
         <div className="bg-red-500/10 border border-red-500/30 border-l-4 border-l-red-500 rounded-xl p-4 space-y-1 animate-pulse-once">
           <p className="text-xs font-black text-red-400 flex items-center gap-1.5"><Lock className="w-4 h-4" /> Bloqueio Temporário por Erro!</p>
-          <p className="text-xs text-red-300/80 leading-relaxed">Você errou a resposta do quiz e deve revisar o material. O quiz ficará bloqueado para novas tentativas até <strong>{new Date(lockoutTime).toLocaleTimeString()} (2 horas)</strong>.</p>
+          <p className="text-xs text-red-300/80 leading-relaxed">Você errou a resposta do quiz e deve revisar o material. O quiz ficará bloqueado para novas tentativas até <strong>{new Date(lockoutTime).toLocaleTimeString()} (15 minutos)</strong>.</p>
         </div>
       )}
 
